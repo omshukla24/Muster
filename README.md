@@ -323,16 +323,5 @@ All **30 tests pass in < 0.20s** completely offline.
 
 ---
 
-## 🏆 Hackathon Rubric Alignment
-
-| Rubric Criterion | Weight | How Muster Scores Maximum |
-| :--- | :---: | :--- |
-| **Real-World Impact** | 25% | Directly solves the crisis of "ghost networks" documented by the US Senate and CMS. Protects patients from medical emergencies where up to 70% of listed providers are non-operational or out-of-network. |
-| **Idea Quality & Reusability** | 25% | Completely domain-agnostic. Packaged as both a reusable Agent Skill (`skills/muster/SKILL.md`) and a FastMCP tool (`muster/mcp_server.py`) callable by any AI agent. |
-| **Technical Implementation** | 25% | Seamless end-to-end CALL-E CLI integration (`calle call start` -> poll `call status`) with normalized schemas, resilient failure recovery, and zero live calls in test suites. |
-| **Product Experience & Demo** | 25% | Stunning v2 "Live Audit Ledger" UI featuring responsive SVG switchboard, interactive node tooltips, telegraph typewriter tickers, and "The Reveal" finale where ghost nodes drop away. |
-
----
-
 ## ⚖️ License
 MIT © 2026 Om Shukla & Muster Contributors. Open source for community reuse.

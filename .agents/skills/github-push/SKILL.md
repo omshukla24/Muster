@@ -56,8 +56,9 @@ Never push a "basic ass" or skeletal README. A winning hackathon/production repo
 8. **Installation, Quickstart & Testing**:
    - Copy-paste terminal commands for local UI, CLI audit (mock vs live), and pytest suite.
    - Clear project tree showing every file and directory.
-9. **Hackathon / Competition Rubric Alignment**:
-   - Direct mapping to judging criteria (Impact, Reusability, Technical CALL-E Runtime, Product Polish).
+
+### Strict Prohibitions (Never Include in README)
+- **NEVER include Hackathon Rubric Alignments, judging criteria, scoring weights, or competition pandering**. The public GitHub README must present strictly as a serious, professional, production-grade open-source software project. Competition rubrics and judging notes belong exclusively in internal handoff docs or private submission portals, never in the public repo README.
 
 ### Step 3: Git Staging, Commit & Push
 1. Check `git status` to verify ONLY intended source files are staged.

@@ -8,7 +8,7 @@ import csv
 import io
 import json
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 from muster.models import AuditJob, AuditSummary
 
@@ -71,23 +71,23 @@ def generate_markdown_report(job: AuditJob) -> str:
     s = job.summary or AuditSummary()
     
     md_lines = [
-        f"# 📋 MUSTER DIRECTORY AUDIT REPORT",
+        "# Muster — Directory Audit Report",
         f"> **Auditor**: Muster (Autonomous Agent Skill powered by CALL-E)  ",
         f"> **Job ID**: `{job.job_id}` | **Mode**: `{job.mode.upper()}` | **Timestamp**: `{job.finished_at or job.created_at}`",
         "",
         "## 1. Executive Summary",
         f"**Headline**: **{s.headline}**",
         "",
-        f"Muster batch-audited **{s.total} listings** from the target institutional directory by placing real verification phone calls via CALL-E. Each listing was queried with a benign qualifying question to certify active operations and empanelment.",
+        f"Muster audited **{s.total} listings** from the target directory via CALL-E ({job.mode} mode), asking each a single benign qualifying question to certify active operation.",
         "",
         "| Metric | Count | Percentage |",
         "| :--- | :--- | :--- |",
         f"| **Total Directory Listings** | **{s.total}** | 100.0% |",
         f"| **Audited Completed** | **{s.completed}** | {(s.completed/s.total*100):.1f}% |",
-        f"| 🚨 **Confirmed GHOST Listings** | **{s.ghost_count}** | **{s.ghost_rate_pct}%** |",
-        f"| ✅ **Verified PRESENT Listings** | **{s.present_count}** | **{s.verified_rate_pct}%** |",
-        f"| ⚠️ **Unreachable / No Answer** | **{s.unreachable_count}** | {((s.unreachable_count/s.completed*100) if s.completed else 0):.1f}% |",
-        f"| ❓ **Uncertain / Interrupted** | **{s.uncertain_count}** | {((s.uncertain_count/s.completed*100) if s.completed else 0):.1f}% |",
+        f"| **Confirmed GHOST Listings** | **{s.ghost_count}** | **{s.ghost_rate_pct}%** |",
+        f"| **Verified PRESENT Listings** | **{s.present_count}** | **{s.verified_rate_pct}%** |",
+        f"| **Unreachable / No Answer** | **{s.unreachable_count}** | {((s.unreachable_count/s.completed*100) if s.completed else 0):.1f}% |",
+        f"| **Uncertain / Interrupted** | **{s.uncertain_count}** | {((s.uncertain_count/s.completed*100) if s.completed else 0):.1f}% |",
         "",
         "## 2. Directory Audit Ledger",
         "",
@@ -96,7 +96,7 @@ def generate_markdown_report(job: AuditJob) -> str:
     ]
 
     for o in job.outcomes:
-        badge = "✅ **PRESENT**" if o.verdict.value == "PRESENT" else ("🚨 **GHOST**" if o.verdict.value == "GHOST" else f"⚠️ {o.verdict.value}")
+        badge = "**PRESENT**" if o.verdict.value == "PRESENT" else ("**GHOST**" if o.verdict.value == "GHOST" else o.verdict.value)
         quote = o.evidence_quotes[0] if o.evidence_quotes else o.stated_reason
         # Escape pipe in quote
         quote_safe = quote.replace("|", "/")
@@ -105,10 +105,10 @@ def generate_markdown_report(job: AuditJob) -> str:
     md_lines.extend([
         "",
         "## 3. Methodology & Verification Standards",
-        "- **Tooling**: Voice qualification executed using CALL-E phone agent with structured schema extraction (`reached_human`, `accepts_scheme`, `admitting_patients`).",
+        "- **Tooling**: Voice qualification executed using CALL-E phone agent with structured schema extraction (`reached_human`, `in_network`, `accepting_new_patients`).",
         "- **Classification Standard**:",
         "  - **PRESENT**: Verified human respondent confirmed active status and patient admissions.",
-        "  - **GHOST**: Respondent explicitly stated they withdrew/stopped taking the scheme, dead carrier line, or wrong entity reached.",
+        "  - **GHOST**: Respondent explicitly stated they left the network or closed, dead carrier line, or wrong entity reached.",
         "  - **UNREACHABLE**: No response after standard ring cycles or automated answering loop.",
         "- **Zero Secrets**: No sensitive patient data or case details requested. Purely non-invasive directory integrity check.",
         "",

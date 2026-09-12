@@ -61,7 +61,7 @@ async def test_engine_run_audit_and_reports():
     assert "Hospital One" in csv_out
 
     md_out = generate_markdown_report(job)
-    assert "# 📋 MUSTER DIRECTORY AUDIT REPORT" in md_out
+    assert "# Muster — Directory Audit Report" in md_out
     assert "Executive Summary" in md_out
 
     with tempfile.TemporaryDirectory() as tmp_dir:

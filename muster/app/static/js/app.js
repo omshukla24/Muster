@@ -568,7 +568,7 @@ async function executeAudit() {
   // Sector and Goal: English hero by default
   const meta = state.presets.find(p => p.id === state.selectedPresetId);
   const goal = meta?.default_goal || "Hello, I am calling to verify directory network status. Are you currently in-network and accepting new patients?";
-  const language = state.selectedPresetId === 'hospitals_pmjay' ? 'hi' : 'en';
+  const language = 'en';
   const sector = meta?.sector || 'US_INSURER';
 
   const payload = {

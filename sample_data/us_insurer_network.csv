@@ -1,0 +1,13 @@
+id,name,phone,claimed_status,category,address
+PROV-101,"Dr. Sarah Jenkins, MD (Family Medicine)",+15552340101,In-Network - BlueCross PPO,Primary Care,"Austin, TX"
+PROV-102,Summit Psychological Associates,+15552340102,In-Network - Aetna Choice,Mental Health,"Denver, CO"
+PROV-103,"Dr. Michael Chen, PsyD",+15552340103,In-Network - Cigna Open Access,Clinical Psychology,"Seattle, WA"
+PROV-104,Lincoln Park Pediatric Health,+15552340104,In-Network - UnitedHealthcare,Pediatrics,"Chicago, IL"
+PROV-105,Beacon Hill Behavioral Wellness,+15552340105,In-Network - BlueCross PPO,Psychotherapy,"Boston, MA"
+PROV-106,"Dr. Elena Rodriguez, LCSW",+15552340106,In-Network - Aetna Choice,Adult Therapy,"San Diego, CA"
+PROV-107,Midtown Comprehensive Dermatology,+15552340107,In-Network - Cigna Open Access,Dermatology,"New York, NY"
+PROV-108,Cedar Valley Counseling Center,+15552340108,In-Network - UnitedHealthcare,Mental Health,"Minneapolis, MN"
+PROV-109,"Dr. James Wilson, MD (Internal Medicine)",+15552340109,In-Network - BlueCross PPO,Internal Medicine,"Philadelphia, PA"
+PROV-110,Oakridge Psychiatric Medical Group,+15552340110,In-Network - Aetna Choice,Psychiatry,"Atlanta, GA"
+PROV-111,"Dr. Amanda Ross, LMFT",+15552340111,In-Network - Cigna Open Access,Marriage & Family,"Portland, OR"
+PROV-112,Metro Urgent Care & Occupational Health,+15552340112,In-Network - UnitedHealthcare,Urgent Care,"Phoenix, AZ"

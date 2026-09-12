@@ -6,6 +6,9 @@
 # Handoff (Om's Global Rule - must stay gitignored)
 handoff/
 
+# Local agent tooling — never publish
+.agents/
+
 # Python Cache & Artifacts
 __pycache__/
 *.py[cod]

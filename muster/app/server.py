@@ -113,15 +113,6 @@ def get_presets():
             "default_goal": "Hello, calling for merchant directory verification. Are you currently operational and fulfilling orders?"
         },
         {
-            "id": "hospitals_pmjay",
-            "name": "PM-JAY Ayushman Bharat Hospitals",
-            "count": 12,
-            "category": "Healthcare Empanelled Network",
-            "sector": "US_INSURER",
-            "filename": "hospitals_pmjay.json",
-            "default_goal": "Namaste, hum directory verification ke liye call kar rahe hain. Kya aapka hospital abhi Ayushman Bharat / PM-JAY ke tehat patients admit kar raha hai?"
-        },
-        {
             "id": "therapists_network",
             "name": "Mental Health In-Network Providers",
             "count": 8,
@@ -139,7 +130,6 @@ def load_preset(preset_id: str):
     file_map = {
         "us_insurer_network": SAMPLE_DATA_DIR / "us_insurer_network.json",
         "marketplace_sellers": SAMPLE_DATA_DIR / "marketplace_sellers.json",
-        "hospitals_pmjay": SAMPLE_DATA_DIR / "hospitals_pmjay.json",
         "therapists_network": SAMPLE_DATA_DIR / "therapists_network.json",
     }
     target = file_map.get(preset_id)
@@ -197,7 +187,7 @@ async def _run_audit_background(
                 job.summary = event.summary
             elif event.event_type == "complete":
                 job.status = "COMPLETED"
-                job.finished_at = datetime.now().strftime("%H:%M:%S IST")
+                job.finished_at = datetime.now().strftime("%H:%M:%S")
                 job.summary = event.summary
 
             await queue.put(event)
@@ -234,7 +224,7 @@ async def start_audit(req: StartAuditRequest, background_tasks: BackgroundTasks)
         completed_entries=0,
         summary=AuditSummary(total=len(req.entries), sector=req.sector),
         outcomes=[],
-        created_at=datetime.now().strftime("%H:%M:%S IST"),
+        created_at=datetime.now().strftime("%H:%M:%S"),
     )
     ACTIVE_JOBS[job_id] = job
 

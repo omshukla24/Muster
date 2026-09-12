@@ -150,7 +150,7 @@ class AuditEngine:
                         transcript=res.get("transcript", ""),
                         evidence_provided=res.get("evidence", []),
                         duration_seconds=res.get("duration_seconds", 0.0),
-                        timestamp=datetime.now().strftime("%H:%M:%S IST"),
+                        timestamp=datetime.now().strftime("%H:%M:%S"),
                         sector=entry_sector,
                     )
 
@@ -169,7 +169,7 @@ class AuditEngine:
                         extracted={"reached_human": False, "stated_reason": f"Connection error: {str(exc)}"},
                         transcript="",
                         duration_seconds=0.0,
-                        timestamp=datetime.now().strftime("%H:%M:%S IST"),
+                        timestamp=datetime.now().strftime("%H:%M:%S"),
                         sector=entry_sector,
                     )
 

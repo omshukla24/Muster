@@ -1,7 +1,7 @@
 """
 Command-line interface for Muster directory auditor.
 Usage:
-  muster audit sample_data/hospitals_pmjay.json --mode mock
+  muster audit sample_data/us_insurer_network.json --mode mock
   muster ui --port 8000
 """
 
@@ -20,8 +20,10 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeEl
 from muster.parser import parse_directory
 from muster.engine import AuditEngine
 from muster.calle_client import CalleClient, MockCalleClient
+from datetime import datetime
+
 from muster.report import save_reports
-from muster.models import Verdict, Sector
+from muster.models import Verdict, Sector, AuditJob
 
 
 console = Console()
@@ -113,9 +115,22 @@ async def run_cli_audit(args):
     console.print(table)
 
     summary = engine.calculate_summary(outcomes, len(entries))
-    job = (await engine.run_audit(entries, job_id=job_id, goal=args.goal))
-    job.outcomes = outcomes
-    job.summary = summary
+    # Build the job from the outcomes already collected above. Do NOT call
+    # engine.run_audit() here — it re-runs the whole audit, which would place
+    # every call a second time (and double the credit spend) in live mode.
+    job = AuditJob(
+        job_id=job_id,
+        name=f"Audit Job {job_id}",
+        mode="live" if is_live else "mock",
+        status="COMPLETED",
+        sector=sector,
+        total_entries=len(entries),
+        completed_entries=len(outcomes),
+        summary=summary,
+        outcomes=outcomes,
+        created_at=datetime.now().strftime("%H:%M:%S"),
+        finished_at=datetime.now().strftime("%H:%M:%S"),
+    )
 
     # Summary Panel
     console.print(Panel(

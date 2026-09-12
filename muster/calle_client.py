@@ -76,6 +76,15 @@ def _unwrap_structured(raw: Any) -> Dict[str, Any]:
     return raw
 
 
+# Statuses that mean a CALL-E run is finished (from get_call_run.status).
+# Anything else (PREPARING, RUNNING, PENDING, CALLING, "", unknown) means keep polling.
+_TERMINAL_STATUSES = {
+    "COMPLETED", "FAILED", "NO ANSWER", "NO_ANSWER", "UNANSWERED", "DECLINED",
+    "BUSY", "CANCELED", "CANCELLED", "BYCALLEE", "ERROR", "EXPIRED", "TIMEOUT",
+    "REJECTED", "DONE",
+}
+
+
 class CalleClient:
     """Production runtime caller interfacing with local `calle` CLI via `call start`."""
 
@@ -85,7 +94,7 @@ class CalleClient:
         integration: str = "skills_sh_skill",
         integration_version: str = "0.1.0",
         poll_interval: float = 2.0,
-        max_poll_seconds: float = 180.0,
+        max_poll_seconds: float = 240.0,
     ):
         self.source = source
         self.integration = integration
@@ -197,48 +206,39 @@ class CalleClient:
                 "raw": start_res,
             }
 
-        # `calle call start` often blocks until the run is terminal and already
-        # carries the full result — if so, use it directly instead of polling.
+        # If call start already returned a terminal run, use it directly.
         start_status = str(start_sc.get("status") or "").upper()
-        _NON_TERMINAL = {"RUNNING", "QUEUED", "PENDING", "IN_PROGRESS", "DIALING", "RINGING", "SCHEDULED"}
-        if start_status and start_status not in _NON_TERMINAL:
+        if start_status in _TERMINAL_STATUSES:
             return self._normalize_calle_result(start_res, run_id, time.time() - start_time)
 
-        # Step 2: Poll status
+        # Step 2: Poll `calle call status` until the run is terminal.
+        # Real lifecycle: PREPARING -> pending -> calling -> COMPLETED/FAILED
+        # (~60s for a no-connect, longer for an answered call). Any status NOT
+        # in _TERMINAL_STATUSES — PREPARING included — means "still running".
+        latest_run_data: Dict[str, Any] = start_res
         elapsed = 0.0
-        terminal_statuses = {
-            "COMPLETED", "FAILED", "NO ANSWER", "NO_ANSWER", "UNANSWERED",
-            "DECLINED", "BUSY", "CANCELED", "CANCELLED", "BYCALLEE",
-            "ERROR", "EXPIRED", "TIMEOUT",
-        }
-
-        latest_run_data: Dict[str, Any] = {}
-
         while elapsed < self.max_poll_seconds:
-            await asyncio.sleep(self.poll_interval)
+            sc = _unwrap_structured(latest_run_data)
+            poll_after = (sc.get("next_step") or {}).get("poll_after_seconds")
+            sleep_s = poll_after if isinstance(poll_after, (int, float)) and poll_after > 0 else self.poll_interval
+            await asyncio.sleep(min(max(sleep_s, 1.0), 10.0))
             elapsed = time.time() - start_time
 
             try:
-                status_res = await asyncio.to_thread(
+                latest_run_data = await asyncio.to_thread(
                     self._run_cli, ["call", "status", "--run-id", str(run_id)]
                 )
-                latest_run_data = status_res
-
-                sc = _unwrap_structured(status_res)
-                curr_status = str(sc.get("status") or "").upper()
-                next_step = sc.get("next_step") or {}
-                poll_after = next_step.get("poll_after_seconds")
-
-                if curr_status in terminal_statuses:
-                    break
-                # No further poll requested and a status is present => terminal
-                if poll_after is None and curr_status and curr_status not in (
-                    "RUNNING", "QUEUED", "PENDING", "IN_PROGRESS", "DIALING", "RINGING", "SCHEDULED"
-                ):
-                    break
             except Exception:
-                # Retry on brief socket error during polling
-                continue
+                continue  # transient socket error; keep polling
+
+            sc = _unwrap_structured(latest_run_data)
+            curr_status = str(sc.get("status") or "").upper()
+            action = str((sc.get("next_step") or {}).get("action") or "")
+            if curr_status in _TERMINAL_STATUSES:
+                break
+            # The attempt is finished when CALL-E asks to retry / reports blocked.
+            if action in ("ask_user_for_retry_confirmation", "report_blocked", "report_final"):
+                break
 
         duration = time.time() - start_time
         return self._normalize_calle_result(latest_run_data, run_id, duration)
@@ -251,37 +251,52 @@ class CalleClient:
         """
         sc = _unwrap_structured(raw)
         status = str(sc.get("status") or "COMPLETED").upper()
-        inner = sc.get("result") or {}
-        if not isinstance(inner, dict):
-            inner = {}
+        inner = sc.get("result") if isinstance(sc.get("result"), dict) else {}
 
-        outcome_node = inner.get("outcome") or {}
-        if not isinstance(outcome_node, dict):
-            outcome_node = {}
-        extracted = dict(inner.get("extracted") or {})
+        outcome_node = inner.get("outcome") if isinstance(inner.get("outcome"), dict) else {}
+        raw_extracted = inner.get("extracted") if isinstance(inner.get("extracted"), dict) else {}
         transcript = inner.get("transcript") or ""
         summary = inner.get("summary") or inner.get("post_summary") or sc.get("message") or ""
 
-        evidence = outcome_node.get("evidence") or inner.get("evidence") or []
+        # Call-level detail lives under extracted.calling.calls[0] (connect / hangup / real duration).
+        calling = raw_extracted.get("calling") if isinstance(raw_extracted.get("calling"), dict) else {}
+        calls = calling.get("calls") if isinstance(calling.get("calls"), list) else []
+        call0 = calls[0] if calls and isinstance(calls[0], dict) else {}
+        call_duration = call0.get("duration_seconds")
+        hangup = str(call0.get("hangup_type") or "").lower()
+
+        # "Connected" only if there's a real transcript or non-trivial talk time.
+        connected = bool(str(transcript).strip()) or (isinstance(call_duration, (int, float)) and call_duration >= 1)
+
+        # Build a clean extracted for the classifier — pass only the answer signals
+        # it understands, never CALL-E's raw goal / repair blob.
+        extracted: Dict[str, Any] = {}
+        for key in (
+            "reached_human", "in_network", "accepting_new_patients", "accepts_scheme",
+            "admitting_patients", "operational", "sells_claimed_product", "reachable",
+            "operating_status",
+        ):
+            if key in raw_extracted:
+                extracted[key] = raw_extracted[key]
+        if "reached_human" not in extracted:
+            extracted["reached_human"] = bool(status == "COMPLETED" and connected)
+        extracted["stated_reason"] = raw_extracted.get("stated_reason") or summary
+
+        evidence = outcome_node.get("evidence") or []
+        if not isinstance(evidence, list):
+            evidence = [str(evidence)]
         if not evidence and summary:
             evidence = [summary]
 
-        # CALL-E doesn't always emit reached_human. Infer it: a terminal call that
-        # produced a real transcript / summary / completed task reached a person.
-        if "reached_human" not in extracted:
-            has_conversation = bool(str(transcript).strip()) or bool(summary)
-            task_done = outcome_node.get("task_completed")
-            extracted["reached_human"] = bool(
-                status == "COMPLETED" and (has_conversation or task_done)
-            )
-        if not extracted.get("stated_reason") and summary:
-            extracted["stated_reason"] = summary
+        # Prefer CALL-E's real call duration over wall-clock time when available.
+        out_duration = call_duration if isinstance(call_duration, (int, float)) else duration
 
-        # Collapse non-answer terminal states to a single UNREACHABLE-friendly value
+        # Collapse no-connect / non-answer outcomes to a single UNREACHABLE value.
+        no_connect = (hangup == "bycallee") or (isinstance(call_duration, (int, float)) and call_duration == 0)
         if status in [
             "BYCALLEE", "NO_ANSWER", "NO ANSWER", "BUSY", "CANCELED",
-            "CANCELLED", "DECLINED", "UNANSWERED", "EXPIRED"
-        ] or (duration < 1.0 and status == "FAILED"):
+            "CANCELLED", "DECLINED", "UNANSWERED", "EXPIRED",
+        ] or (status in ("FAILED", "ERROR") and not connected) or no_connect:
             status = "NO ANSWER"
 
         return {
@@ -290,7 +305,7 @@ class CalleClient:
             "extracted": extracted,
             "evidence": evidence,
             "transcript": transcript,
-            "duration_seconds": round(duration, 2),
+            "duration_seconds": round(out_duration, 2),
             "raw": raw,
         }
 

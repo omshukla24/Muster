@@ -19,6 +19,7 @@
       <span class="tag">Directory ghost-rate auditor</span>
     </div>
     <div class="live">
+      <div>Mode<b class="modeflag demo" id="modeFlag">◐ Demo</b></div>
       <div>Calls placed<b id="mCalls">0</b></div>
       <div>Elapsed<b id="mElapsed">0.0s</b></div>
       <div>Status<b class="on" id="mStatus">Ready</b></div>
@@ -42,6 +43,7 @@
           </svg>
           <div>
             <div class="headline"><b id="hlGhost">—</b> <span id="hlRest">of 12 listed are ghosts</span></div>
+            <div class="modeline demo" id="modeLine">Demo rehearsal — simulated calls, no credits used</div>
           </div>
         </div>
       </div>
@@ -67,7 +69,7 @@
       <!-- Right: Dark Switchboard Network Centerpiece -->
     <div class="panel board">
       <div class="bhead">
-        <span class="kicker">Live switchboard</span>
+        <span class="kicker">Switchboard <span class="boardmode" id="boardMode">· ◐ Demo</span></span>
         <span class="st" id="boardSt">US In-Network Providers · 12</span>
       </div>
       <svg id="net" viewBox="0 0 720 460" aria-hidden="true"></svg>
@@ -80,7 +82,10 @@
   <div class="controls">
     <button class="run" id="runBtn">▶ Run audit</button>
     <button class="pause-btn disabled" id="pauseBtn" title="Pause or step through active audit">⏸ Pause</button>
-    <span class="chip live" id="modeChip" title="Click to toggle between Mock Rehearsal and Live CALL-E">◉ Mock Rehearsal</span>
+    <button class="modetoggle demo" id="modeChip" title="Click to switch between Demo (simulated, free) and Live (real CALL-E calls)">
+      <span class="mt-label"><span class="mt-dot"></span><span id="modeChipLabel">Demo</span></span>
+      <span class="mt-sub" id="modeChipSub">simulated · 0 credits · click for Live</span>
+    </button>
     <span class="chip" id="dirChip">
       <select id="presetSelect" aria-label="Target directory">
         <option value="us_insurer_network" selected>US In-Network Providers (12) · Hero</option>

@@ -69,6 +69,11 @@ const dom = {
   runBtn: document.getElementById('runBtn'),
   pauseBtn: document.getElementById('pauseBtn'),
   modeChip: document.getElementById('modeChip'),
+  modeChipLabel: document.getElementById('modeChipLabel'),
+  modeChipSub: document.getElementById('modeChipSub'),
+  modeFlag: document.getElementById('modeFlag'),
+  boardMode: document.getElementById('boardMode'),
+  modeLine: document.getElementById('modeLine'),
   presetSelect: document.getElementById('presetSelect'),
   fileInput: document.getElementById('fileInput'),
   speedGroup: document.getElementById('speedGroup'),
@@ -94,6 +99,7 @@ const dom = {
 // Initialize
 async function init() {
   setupEventListeners();
+  applyModeUI();
   await loadPresets();
   await selectPreset(state.selectedPresetId);
 }
@@ -160,18 +166,36 @@ function setupEventListeners() {
   });
 }
 
+function applyModeUI() {
+  const live = state.mode === 'live';
+  if (dom.modeChip) {
+    dom.modeChip.classList.toggle('livem', live);
+    dom.modeChip.classList.toggle('demo', !live);
+  }
+  if (dom.modeChipLabel) dom.modeChipLabel.textContent = live ? 'Live' : 'Demo';
+  if (dom.modeChipSub) dom.modeChipSub.textContent = live
+    ? 'real CALL-E calls · metered · click for Demo'
+    : 'simulated · 0 credits · click for Live';
+  if (dom.modeFlag) {
+    dom.modeFlag.textContent = live ? '● Live' : '◐ Demo';
+    dom.modeFlag.classList.toggle('livem', live);
+    dom.modeFlag.classList.toggle('demo', !live);
+  }
+  if (dom.board) dom.board.classList.toggle('livem', live);
+  if (dom.boardMode) dom.boardMode.textContent = live ? '· ● Live — real calls' : '· ◐ Demo';
+  if (dom.modeLine) {
+    dom.modeLine.textContent = live
+      ? 'Live audit — real CALL-E calls placed'
+      : 'Demo rehearsal — simulated calls, no credits used';
+    dom.modeLine.classList.toggle('livem', live);
+    dom.modeLine.classList.toggle('demo', !live);
+  }
+}
+
 function toggleMode() {
   if (state.isAuditing) return;
   state.mode = state.mode === 'mock' ? 'live' : 'mock';
-  if (state.mode === 'live') {
-    dom.modeChip.textContent = '◉ Live CALL-E';
-    dom.modeChip.style.borderColor = '#C8434E';
-    dom.modeChip.style.color = '#9B2A34';
-  } else {
-    dom.modeChip.textContent = '◉ Mock Rehearsal';
-    dom.modeChip.style.borderColor = 'var(--ink)';
-    dom.modeChip.style.color = 'var(--ink)';
-  }
+  applyModeUI();
 }
 
 async function loadPresets() {

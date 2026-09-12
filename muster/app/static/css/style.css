@@ -788,3 +788,44 @@ a {
   border-top: 1px solid var(--line);
   padding-top: 12px;
 }
+
+/* --------------------------------------------------------------------------
+   Mode clarity — Demo (simulated, free) vs Live (real CALL-E calls)
+   -------------------------------------------------------------------------- */
+/* top-bar mode flag */
+.top .live b.modeflag { font-family: var(--font-mono); font-size: 14px; font-weight: 600; letter-spacing: .02em; }
+.modeflag.demo  { color: var(--muted); }
+.modeflag.livem { color: var(--ghost); }
+
+/* mode toggle button (replaces the plain chip) */
+.modetoggle {
+  display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  border: 1.5px solid var(--line); background: var(--paper); border-radius: 8px;
+  padding: 6px 14px 7px; cursor: pointer; line-height: 1.15; font-family: var(--font-body);
+  transition: border-color .15s, background .15s, color .15s;
+}
+.modetoggle:hover { border-color: var(--ink); }
+.modetoggle .mt-label { font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 7px; }
+.modetoggle .mt-sub { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .02em; color: var(--muted); }
+.modetoggle .mt-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--muted); }
+.modetoggle.demo  { border-color: var(--line); color: var(--ink); background: var(--paper); }
+.modetoggle.demo .mt-dot { background: var(--muted); }
+.modetoggle.livem { border-color: var(--ghost); color: var(--ghost); background: #fbf1f1; }
+.modetoggle.livem .mt-sub { color: var(--ghost); }
+.modetoggle.livem .mt-dot { background: var(--ghost-bright); animation: livepulse 1.4s infinite; }
+@keyframes livepulse {
+  0%   { box-shadow: 0 0 0 0 rgba(200,67,78,.55); }
+  70%  { box-shadow: 0 0 0 7px rgba(200,67,78,0); }
+  100% { box-shadow: 0 0 0 0 rgba(200,67,78,0); }
+}
+
+/* switchboard header mode tag + live tint on the dark board */
+.board .bhead .boardmode { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; color: #8790a0; }
+.board.livem { border-color: var(--ghost); box-shadow: inset 0 0 0 1.5px var(--ghost-bright); }
+.board.livem .bhead .boardmode { color: var(--ghost-bright); }
+
+/* results mode line under the headline (so a screenshot is self-explanatory) */
+.modeline { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .02em; margin-top: 8px; color: var(--muted); }
+.modeline.livem { color: var(--ghost); font-weight: 500; }
+
+@media (prefers-reduced-motion: reduce) { .modetoggle.livem .mt-dot { animation: none; } }

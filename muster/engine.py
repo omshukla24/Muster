@@ -60,7 +60,12 @@ class AuditEngine:
         verified_rate = round((present / completed * 100), 1) if completed > 0 else 0.0
         avg_dur = round(sum(o.duration_seconds for o in outcomes) / completed, 1) if completed > 0 else 0.0
 
-        headline = f"{ghost} of {completed} audited = GHOST ({ghost_rate}%)" if completed > 0 else "Audit in progress..."
+        if completed == 0:
+            headline = "Audit in progress..."
+        elif present == 0 and ghost == 0:
+            headline = f"{unreachable + uncertain} of {completed} could not be verified"
+        else:
+            headline = f"{ghost} of {completed} audited = GHOST ({ghost_rate}%)"
 
         return AuditSummary(
             total=total_entries,
@@ -160,13 +165,15 @@ class AuditEngine:
                         entry_name=entry.name,
                         phone=entry.phone,
                         run_id=f"err-{entry.id}",
-                        calle_status="FAILED",
+                        calle_status="ERROR",
                         verdict=Verdict.UNREACHABLE,
                         confidence_score=0.90,
                         confidence=Confidence.HIGH,
-                        evidence_quotes=[f"Connection unreachable: {str(exc)}"],
-                        stated_reason=f"Call connection failed: {str(exc)}",
-                        extracted={"reached_human": False, "stated_reason": f"Connection error: {str(exc)}"},
+                        evidence_quotes=["The call could not be completed (system error)."],
+                        stated_reason="The call could not be completed due to a system error.",
+                        extracted={"reached_human": False,
+                                   "stated_reason": "The call could not be completed due to a system error.",
+                                   "error_detail": str(exc)},
                         transcript="",
                         duration_seconds=0.0,
                         timestamp=datetime.now().strftime("%H:%M:%S"),

@@ -829,3 +829,15 @@ a {
 .modeline.livem { color: var(--ghost); font-weight: 500; }
 
 @media (prefers-reduced-motion: reduce) { .modetoggle.livem .mt-dot { animation: none; } }
+
+/* louder Live-mode accents + error banner */
+.livebanner {
+  margin: 14px 0 0; padding: 11px 16px; border-radius: 6px;
+  background: var(--ghost); color: #fff; font-family: var(--font-mono);
+  font-size: 12.5px; letter-spacing: .05em; text-transform: uppercase;
+  font-weight: 600; display: flex; align-items: center; gap: 8px;
+}
+.livebanner.err { background: var(--uncertain); text-transform: none; letter-spacing: .02em; }
+body.livemode .top { border-bottom-color: var(--ghost); }
+.run.livego { background: var(--ghost); }
+.run.livego:hover:not(:disabled) { background: var(--ghost-bright); }

@@ -201,17 +201,17 @@ class CalleClient:
         try:
             start_res = await asyncio.to_thread(self._run_cli, start_args)
         except Exception as exc:
-            # Resilient fallback: return cleanly as UNREACHABLE / failed delivery rather than crashing
-            err_msg = str(exc)
+            # Resilient fallback: report a clean UNREACHABLE rather than crashing.
             duration = time.time() - start_time
             return {
                 "run_id": f"err-{int(start_time)}",
-                "status": "UNREACHABLE",
-                "extracted": {"reached_human": False, "stated_reason": f"Dispatch error: {err_msg}"},
-                "evidence": [f"Delivery failure: {err_msg}"],
-                "transcript": f"[Carrier/Delivery error: {err_msg}]",
+                "status": "ERROR",
+                "extracted": {"reached_human": False,
+                              "stated_reason": "The call could not be placed (system or network error)."},
+                "evidence": ["The call could not be placed — no connection was established."],
+                "transcript": "",
                 "duration_seconds": round(duration, 2),
-                "raw": {},
+                "raw": {"error": str(exc)},
             }
 
         start_sc = _unwrap_structured(start_res)
@@ -233,10 +233,11 @@ class CalleClient:
         if not run_id:
             return {
                 "run_id": f"unconfirmed-{int(start_time)}",
-                "status": "UNREACHABLE",
-                "extracted": {"reached_human": False, "stated_reason": "No run_id returned by CALL-E"},
-                "evidence": ["CALL-E call start did not return run_id"],
-                "transcript": "[Delivery incomplete]",
+                "status": "ERROR",
+                "extracted": {"reached_human": False,
+                              "stated_reason": "The call could not be started."},
+                "evidence": ["CALL-E did not create a call run for this number."],
+                "transcript": "",
                 "duration_seconds": round(time.time() - start_time, 2),
                 "raw": start_res,
             }

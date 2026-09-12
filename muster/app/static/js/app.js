@@ -74,6 +74,7 @@ const dom = {
   modeFlag: document.getElementById('modeFlag'),
   boardMode: document.getElementById('boardMode'),
   modeLine: document.getElementById('modeLine'),
+  liveBanner: document.getElementById('liveBanner'),
   presetSelect: document.getElementById('presetSelect'),
   fileInput: document.getElementById('fileInput'),
   speedGroup: document.getElementById('speedGroup'),
@@ -166,8 +167,31 @@ function setupEventListeners() {
   });
 }
 
+function setLiveBanner() {
+  if (!dom.liveBanner) return;
+  dom.liveBanner.classList.remove('err');
+  if (state.mode === 'live') {
+    dom.liveBanner.textContent = '● LIVE — real CALL-E calls will be placed · billed per minute';
+    dom.liveBanner.hidden = false;
+  } else {
+    dom.liveBanner.hidden = true;
+  }
+}
+
+function showError(msg) {
+  if (!dom.liveBanner) return;
+  dom.liveBanner.textContent = '⚠ ' + msg;
+  dom.liveBanner.classList.add('err');
+  dom.liveBanner.hidden = false;
+}
+
+function runIdleLabel() {
+  return state.mode === 'live' ? '▶ Run LIVE audit' : '▶ Run demo';
+}
+
 function applyModeUI() {
   const live = state.mode === 'live';
+  document.body.classList.toggle('livemode', live);
   if (dom.modeChip) {
     dom.modeChip.classList.toggle('livem', live);
     dom.modeChip.classList.toggle('demo', !live);
@@ -190,6 +214,11 @@ function applyModeUI() {
     dom.modeLine.classList.toggle('livem', live);
     dom.modeLine.classList.toggle('demo', !live);
   }
+  if (dom.runBtn && !state.isAuditing) {
+    dom.runBtn.textContent = runIdleLabel();
+    dom.runBtn.classList.toggle('livego', live);
+  }
+  setLiveBanner();
 }
 
 function toggleMode() {
@@ -264,7 +293,8 @@ function resetState() {
   dom.mStatus.classList.add('on');
 
   dom.runBtn.disabled = false;
-  dom.runBtn.textContent = '▶ Run audit';
+  dom.runBtn.textContent = runIdleLabel();
+  dom.runBtn.classList.toggle('livego', state.mode === 'live');
 
   if (dom.pauseBtn) {
     dom.pauseBtn.disabled = true;
@@ -538,6 +568,7 @@ async function executeAudit() {
   state.isAuditing = true;
   state.isPaused = false;
   state.pendingEvents = [];
+  setLiveBanner();
 
   // Reset visual state
   dom.mStatus.textContent = state.mode === 'live' ? 'Calling (Live)…' : 'Auditing…';
@@ -617,10 +648,10 @@ async function executeAudit() {
     state.jobId = data.job_id;
     listenToEvents(state.jobId);
   } catch (err) {
-    alert(`Audit launch error: ${err.message}`);
+    showError(`Couldn't start the audit: ${err.message}`);
     state.isAuditing = false;
     dom.runBtn.disabled = false;
-    dom.runBtn.textContent = '▶ Run audit';
+    dom.runBtn.textContent = runIdleLabel();
     if (dom.pauseBtn) dom.pauseBtn.classList.add('disabled');
     clearInterval(state.timer);
   }
@@ -696,6 +727,10 @@ function handleProgressEvent(event) {
     resolveEntry(outcome);
   } else if (event_type === 'complete') {
     finishAudit();
+  } else if (event_type === 'error') {
+    showError(event.message || 'The audit run failed.');
+    finishAudit();
+    return;
   }
 
   if (summary) {
@@ -906,6 +941,7 @@ function finishAudit() {
 
   dom.runBtn.disabled = false;
   dom.runBtn.textContent = '↻ Replay audit';
+  dom.runBtn.classList.toggle('livego', state.mode === 'live');
 }
 
 // --------------------------------------------------------------------------

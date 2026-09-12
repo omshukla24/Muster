@@ -76,6 +76,44 @@ def _unwrap_structured(raw: Any) -> Dict[str, Any]:
     return raw
 
 
+def _parse_json_blob(text: str) -> Optional[Dict[str, Any]]:
+    """Best-effort extraction of one JSON object from CLI output that may carry
+    progress/log lines before or after the JSON. Returns a dict or None."""
+    text = (text or "").strip()
+    if not text:
+        return None
+    try:
+        obj = json.loads(text)
+        return obj if isinstance(obj, dict) else None
+    except Exception:
+        pass
+    lines = text.splitlines()
+    for i in range(len(lines)):
+        try:
+            obj = json.loads("\n".join(lines[i:]))
+            if isinstance(obj, dict):
+                return obj
+        except Exception:
+            continue
+    # Balanced-brace scan for the first complete {...} object.
+    depth, start = 0, None
+    for idx, ch in enumerate(text):
+        if ch == "{":
+            if depth == 0:
+                start = idx
+            depth += 1
+        elif ch == "}" and depth > 0:
+            depth -= 1
+            if depth == 0 and start is not None:
+                try:
+                    obj = json.loads(text[start:idx + 1])
+                    if isinstance(obj, dict):
+                        return obj
+                except Exception:
+                    start = None
+    return None
+
+
 # Statuses that mean a CALL-E run is finished (from get_call_run.status).
 # Anything else (PREPARING, RUNNING, PENDING, CALLING, "", unknown) means keep polling.
 _TERMINAL_STATUSES = {
@@ -110,7 +148,12 @@ class CalleClient:
         return env
 
     def _run_cli(self, args: list[str]) -> Dict[str, Any]:
-        """Runs the calle CLI synchronously and returns parsed JSON output."""
+        """Runs the calle CLI and returns parsed JSON.
+
+        Resilient to: the Windows npm shim, stdout/stderr coming back as None,
+        non-zero exits that still carry a JSON body (e.g. balance / retry errors),
+        and progress lines streamed around the JSON on a long connected call.
+        """
         cmd = _calle_argv(args + ["--json"])
         proc = subprocess.run(
             cmd,
@@ -119,23 +162,15 @@ class CalleClient:
             text=True,
             check=False,
         )
-        if proc.returncode != 0:
-            err = proc.stderr.strip() or proc.stdout.strip()
-            raise RuntimeError(f"calle CLI error (code {proc.returncode}): {err}")
+        out = (proc.stdout or "").strip()
+        err = (proc.stderr or "").strip()
 
-        stdout_raw = proc.stdout.strip()
-        try:
-            return json.loads(stdout_raw)
-        except json.JSONDecodeError:
-            # Search from end for the last valid JSON block
-            lines = stdout_raw.splitlines()
-            for i in range(len(lines)):
-                sub = "\n".join(lines[i:])
-                try:
-                    return json.loads(sub)
-                except Exception:
-                    continue
-            raise RuntimeError(f"Failed to parse JSON output from calle CLI: {stdout_raw}")
+        parsed = _parse_json_blob(out)
+        if parsed is not None:
+            return parsed  # includes structured error bodies; the caller normalizes
+
+        detail = err or out or f"exit code {proc.returncode}, no output"
+        raise RuntimeError(f"calle CLI error (exit {proc.returncode}): {detail[:400]}")
 
     async def execute_call_audit(
         self,

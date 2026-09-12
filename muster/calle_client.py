@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import shutil
 import subprocess
 import time
 from typing import Dict, Any, Optional
@@ -31,6 +32,20 @@ def infer_region_from_phone(phone: str) -> str:
     if clean.startswith("+61"):
         return "AU"
     return "US"
+
+
+def _calle_argv(args: list) -> list:
+    """Build an argv that launches the `calle` CLI reliably, Windows included.
+
+    On Windows `calle` is usually an npm shim (calle.cmd). Python's subprocess
+    (CreateProcess, no shell) can't launch a bare `calle` or a .cmd directly and
+    fails with WinError 2. Resolve the real launcher via PATH/PATHEXT and route
+    .cmd/.bat through cmd.exe so the call actually runs.
+    """
+    exe = shutil.which("calle") or "calle"
+    if os.name == "nt" and exe.lower().endswith((".cmd", ".bat")):
+        return ["cmd", "/c", exe, *args]
+    return [exe, *args]
 
 
 class CalleClient:
@@ -59,7 +74,7 @@ class CalleClient:
 
     def _run_cli(self, args: list[str]) -> Dict[str, Any]:
         """Runs the calle CLI synchronously and returns parsed JSON output."""
-        cmd = ["calle"] + args + ["--json"]
+        cmd = _calle_argv(args + ["--json"])
         proc = subprocess.run(
             cmd,
             env=self._get_env(),

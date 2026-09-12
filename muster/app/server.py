@@ -69,7 +69,8 @@ def get_auth_status():
     """Checks CALL-E authentication status and credit note."""
     try:
         import subprocess
-        proc = subprocess.run(["calle", "auth", "status", "--json"], capture_output=True, text=True, check=False)
+        from muster.calle_client import _calle_argv
+        proc = subprocess.run(_calle_argv(["auth", "status", "--json"]), capture_output=True, text=True, check=False)
         out = proc.stdout.strip()
         data = json.loads(out)
         usable = bool(data.get("usable", False))

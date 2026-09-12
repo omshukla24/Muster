@@ -48,6 +48,34 @@ def _calle_argv(args: list) -> list:
     return [exe, *args]
 
 
+def _unwrap_structured(raw: Any) -> Dict[str, Any]:
+    """Return the real CALL-E payload from a CLI response.
+
+    The CLI wraps everything as {ok, result: {structuredContent: {...},
+    content: [{type: 'text', text: '<json>'}]}}. The useful fields
+    (run_id, status, result{...}, next_step) live in structuredContent;
+    fall back to the JSON text mirror, then to raw.
+    """
+    if not isinstance(raw, dict):
+        return {}
+    res = raw.get("result")
+    if isinstance(res, dict):
+        sc = res.get("structuredContent")
+        if isinstance(sc, dict):
+            return sc
+        content = res.get("content")
+        if isinstance(content, list):
+            for item in content:
+                if isinstance(item, dict) and item.get("type") == "text" and item.get("text"):
+                    try:
+                        parsed = json.loads(item["text"])
+                        if isinstance(parsed, dict):
+                            return parsed
+                    except Exception:
+                        pass
+    return raw
+
+
 class CalleClient:
     """Production runtime caller interfacing with local `calle` CLI via `call start`."""
 
@@ -57,7 +85,7 @@ class CalleClient:
         integration: str = "skills_sh_skill",
         integration_version: str = "0.1.0",
         poll_interval: float = 2.0,
-        max_poll_seconds: float = 120.0,
+        max_poll_seconds: float = 180.0,
     ):
         self.source = source
         self.integration = integration
@@ -142,21 +170,21 @@ class CalleClient:
                 "raw": {},
             }
 
-        run_id = start_res.get("run_id") or start_res.get("id")
-        if not run_id and "result" in start_res:
-            res_obj = start_res["result"]
-            run_id = res_obj.get("run_id") or res_obj.get("id")
+        start_sc = _unwrap_structured(start_res)
+        run_id = start_sc.get("run_id") or start_res.get("run_id") or start_res.get("id")
 
         if not run_id:
-            # Fallback if plan output returned instead
-            plan_id = start_res.get("plan_id") or start_res.get("result", {}).get("plan_id")
-            confirm_token = start_res.get("confirm_token") or start_res.get("result", {}).get("confirm_token")
+            # Fallback if a plan (not a run) came back
+            plan_id = start_sc.get("plan_id") or start_res.get("plan_id")
+            confirm_token = start_sc.get("confirm_token") or start_res.get("confirm_token")
             if plan_id and confirm_token:
                 run_res = await asyncio.to_thread(
                     self._run_cli,
                     ["call", "run", "--plan-id", str(plan_id), "--confirm-token", str(confirm_token)]
                 )
-                run_id = run_res.get("run_id") or run_res.get("result", {}).get("run_id")
+                run_sc = _unwrap_structured(run_res)
+                run_id = run_sc.get("run_id")
+                start_res, start_sc = run_res, run_sc
 
         if not run_id:
             return {
@@ -169,11 +197,19 @@ class CalleClient:
                 "raw": start_res,
             }
 
+        # `calle call start` often blocks until the run is terminal and already
+        # carries the full result — if so, use it directly instead of polling.
+        start_status = str(start_sc.get("status") or "").upper()
+        _NON_TERMINAL = {"RUNNING", "QUEUED", "PENDING", "IN_PROGRESS", "DIALING", "RINGING", "SCHEDULED"}
+        if start_status and start_status not in _NON_TERMINAL:
+            return self._normalize_calle_result(start_res, run_id, time.time() - start_time)
+
         # Step 2: Poll status
         elapsed = 0.0
         terminal_statuses = {
-            "COMPLETED", "FAILED", "NO ANSWER", "NO_ANSWER",
-            "DECLINED", "BUSY", "CANCELED", "CANCELLED", "BYCALLEE"
+            "COMPLETED", "FAILED", "NO ANSWER", "NO_ANSWER", "UNANSWERED",
+            "DECLINED", "BUSY", "CANCELED", "CANCELLED", "BYCALLEE",
+            "ERROR", "EXPIRED", "TIMEOUT",
         }
 
         latest_run_data: Dict[str, Any] = {}
@@ -188,11 +224,17 @@ class CalleClient:
                 )
                 latest_run_data = status_res
 
-                curr_status = str(status_res.get("status", "")).upper()
-                if not curr_status and "result" in status_res:
-                    curr_status = str(status_res["result"].get("status", "")).upper()
+                sc = _unwrap_structured(status_res)
+                curr_status = str(sc.get("status") or "").upper()
+                next_step = sc.get("next_step") or {}
+                poll_after = next_step.get("poll_after_seconds")
 
                 if curr_status in terminal_statuses:
+                    break
+                # No further poll requested and a status is present => terminal
+                if poll_after is None and curr_status and curr_status not in (
+                    "RUNNING", "QUEUED", "PENDING", "IN_PROGRESS", "DIALING", "RINGING", "SCHEDULED"
+                ):
                     break
             except Exception:
                 # Retry on brief socket error during polling
@@ -202,17 +244,44 @@ class CalleClient:
         return self._normalize_calle_result(latest_run_data, run_id, duration)
 
     def _normalize_calle_result(self, raw: Dict[str, Any], run_id: str, duration: float) -> Dict[str, Any]:
-        """Normalizes CALL-E result into a uniform dict for the classifier."""
-        res_node = raw.get("result", raw)
-        status = res_node.get("status", raw.get("status", "COMPLETED")).upper()
+        """Normalizes a CALL-E CLI response into a uniform dict for the classifier.
 
-        outcome_node = res_node.get("outcome", {}) or {}
-        extracted = res_node.get("extracted") or outcome_node.get("extracted") or {}
-        evidence = outcome_node.get("evidence") or res_node.get("evidence") or []
-        transcript = res_node.get("transcript") or outcome_node.get("transcript") or ""
+        The CLI wraps the real payload under result.structuredContent, whose own
+        `result` node holds status/outcome/extracted/transcript/summary.
+        """
+        sc = _unwrap_structured(raw)
+        status = str(sc.get("status") or "COMPLETED").upper()
+        inner = sc.get("result") or {}
+        if not isinstance(inner, dict):
+            inner = {}
 
-        # Handle ByCallee / cancelled / 0s failures cleanly as UNREACHABLE
-        if status in ["BYCALLEE", "NO_ANSWER", "NO ANSWER", "BUSY", "CANCELED", "CANCELLED", "DECLINED"] or (duration < 1.0 and status == "FAILED"):
+        outcome_node = inner.get("outcome") or {}
+        if not isinstance(outcome_node, dict):
+            outcome_node = {}
+        extracted = dict(inner.get("extracted") or {})
+        transcript = inner.get("transcript") or ""
+        summary = inner.get("summary") or inner.get("post_summary") or sc.get("message") or ""
+
+        evidence = outcome_node.get("evidence") or inner.get("evidence") or []
+        if not evidence and summary:
+            evidence = [summary]
+
+        # CALL-E doesn't always emit reached_human. Infer it: a terminal call that
+        # produced a real transcript / summary / completed task reached a person.
+        if "reached_human" not in extracted:
+            has_conversation = bool(str(transcript).strip()) or bool(summary)
+            task_done = outcome_node.get("task_completed")
+            extracted["reached_human"] = bool(
+                status == "COMPLETED" and (has_conversation or task_done)
+            )
+        if not extracted.get("stated_reason") and summary:
+            extracted["stated_reason"] = summary
+
+        # Collapse non-answer terminal states to a single UNREACHABLE-friendly value
+        if status in [
+            "BYCALLEE", "NO_ANSWER", "NO ANSWER", "BUSY", "CANCELED",
+            "CANCELLED", "DECLINED", "UNANSWERED", "EXPIRED"
+        ] or (duration < 1.0 and status == "FAILED"):
             status = "NO ANSWER"
 
         return {

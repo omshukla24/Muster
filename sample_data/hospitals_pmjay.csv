@@ -1,0 +1,13 @@
+id,name,phone,claimed_status,category,address
+HOSP-001,Apex Multispecialty Hospital,+919876543201,Empanelled - PM-JAY,General & Critical Care,"Sector 14, Gurugram, Haryana"
+HOSP-002,Sanjeevani Super Specialty Clinic,+919876543202,Empanelled - PM-JAY,Cardiology & Surgery,"Civil Lines, Jaipur, Rajasthan"
+HOSP-003,Shree Ram Memorial Hospital,+919876543203,Empanelled - PM-JAY,Orthopedics,"GT Road, Kanpur, Uttar Pradesh"
+HOSP-004,LifeLine Trauma Centre,+919876543204,Empanelled - PM-JAY,Emergency & Trauma,"Ring Road, Surat, Gujarat"
+HOSP-005,Arogya Niketan Maternity & Nursing Home,+919876543205,Empanelled - PM-JAY,Obstetrics & Gynecology,"Boring Road, Patna, Bihar"
+HOSP-006,Dr. Verma ENT & Eye Centre,+919876543206,Empanelled - PM-JAY,Ophthalmology,"Mall Road, Shimla, Himachal Pradesh"
+HOSP-007,Metro Heart & Kidney Institute,+919876543207,Empanelled - PM-JAY,Nephrology & Dialysis,"Indira Nagar, Lucknow, Uttar Pradesh"
+HOSP-008,City Care Charitable Hospital,+919876543208,Empanelled - PM-JAY,Multi-Specialty,"Kankarbagh, Patna, Bihar"
+HOSP-009,Navjeevan Child Healthcare Clinic,+919876543209,Empanelled - PM-JAY,Pediatrics,"MG Road, Indore, Madhya Pradesh"
+HOSP-010,Suraksha Diagnostic & Daycare Centre,+919876543210,Empanelled - PM-JAY,Diagnostics & Oncology,"Salt Lake Sector V, Kolkata, West Bengal"
+HOSP-011,Prabhat General Hospital,+919876543211,Empanelled - PM-JAY,General Medicine,"Station Road, Varanasi, Uttar Pradesh"
+HOSP-012,Kailash Valley Medical Mission,+919876543212,Empanelled - PM-JAY,Primary & Urgent Care,"Rajpur Road, Dehradun, Uttarakhand"

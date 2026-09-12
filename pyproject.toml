@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "muster"
+version = "0.1.0"
+description = "Directory Ghost-Rate Auditor powered by CALL-E"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Muster Contributors" }
+]
+dependencies = [
+    "pydantic>=2.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+    "sse-starlette>=1.6.0",
+    "httpx>=0.24.0",
+    "rich>=13.0.0"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0"
+]
+
+[project.scripts]
+muster = "muster.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["muster*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+

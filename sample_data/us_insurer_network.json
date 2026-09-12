@@ -1,0 +1,98 @@
+[
+  {
+    "id": "PROV-101",
+    "name": "Dr. Sarah Jenkins, MD (Family Medicine)",
+    "phone": "+15552340101",
+    "claimed_status": "In-Network - BlueCross PPO",
+    "category": "Primary Care",
+    "address": "Austin, TX"
+  },
+  {
+    "id": "PROV-102",
+    "name": "Summit Psychological Associates",
+    "phone": "+15552340102",
+    "claimed_status": "In-Network - Aetna Choice",
+    "category": "Mental Health",
+    "address": "Denver, CO"
+  },
+  {
+    "id": "PROV-103",
+    "name": "Dr. Michael Chen, PsyD",
+    "phone": "+15552340103",
+    "claimed_status": "In-Network - Cigna Open Access",
+    "category": "Clinical Psychology",
+    "address": "Seattle, WA"
+  },
+  {
+    "id": "PROV-104",
+    "name": "Lincoln Park Pediatric Health",
+    "phone": "+15552340104",
+    "claimed_status": "In-Network - UnitedHealthcare",
+    "category": "Pediatrics",
+    "address": "Chicago, IL"
+  },
+  {
+    "id": "PROV-105",
+    "name": "Beacon Hill Behavioral Wellness",
+    "phone": "+15552340105",
+    "claimed_status": "In-Network - BlueCross PPO",
+    "category": "Psychotherapy",
+    "address": "Boston, MA"
+  },
+  {
+    "id": "PROV-106",
+    "name": "Dr. Elena Rodriguez, LCSW",
+    "phone": "+15552340106",
+    "claimed_status": "In-Network - Aetna Choice",
+    "category": "Adult Therapy",
+    "address": "San Diego, CA"
+  },
+  {
+    "id": "PROV-107",
+    "name": "Midtown Comprehensive Dermatology",
+    "phone": "+15552340107",
+    "claimed_status": "In-Network - Cigna Open Access",
+    "category": "Dermatology",
+    "address": "New York, NY"
+  },
+  {
+    "id": "PROV-108",
+    "name": "Cedar Valley Counseling Center",
+    "phone": "+15552340108",
+    "claimed_status": "In-Network - UnitedHealthcare",
+    "category": "Mental Health",
+    "address": "Minneapolis, MN"
+  },
+  {
+    "id": "PROV-109",
+    "name": "Dr. James Wilson, MD (Internal Medicine)",
+    "phone": "+15552340109",
+    "claimed_status": "In-Network - BlueCross PPO",
+    "category": "Internal Medicine",
+    "address": "Philadelphia, PA"
+  },
+  {
+    "id": "PROV-110",
+    "name": "Oakridge Psychiatric Medical Group",
+    "phone": "+15552340110",
+    "claimed_status": "In-Network - Aetna Choice",
+    "category": "Psychiatry",
+    "address": "Atlanta, GA"
+  },
+  {
+    "id": "PROV-111",
+    "name": "Dr. Amanda Ross, LMFT",
+    "phone": "+15552340111",
+    "claimed_status": "In-Network - Cigna Open Access",
+    "category": "Marriage & Family",
+    "address": "Portland, OR"
+  },
+  {
+    "id": "PROV-112",
+    "name": "Metro Urgent Care & Occupational Health",
+    "phone": "+15552340112",
+    "claimed_status": "In-Network - UnitedHealthcare",
+    "category": "Urgent Care",
+    "address": "Phoenix, AZ"
+  }
+]

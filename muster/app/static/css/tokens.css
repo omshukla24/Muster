@@ -1,0 +1,32 @@
+/* Muster — "Live Audit Ledger" v2 tokens. Committed design code. Reference impl: handoff/design-ref.html. Layout + animation specs: handoff/DESIGN.md. */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root{
+  /* ground / ink — cool archival paper + one dark switchboard panel */
+  --bone:#F3F4F2; --paper:#FCFCFB; --ink:#14161b; --ink-panel:#171a21; --muted:#616773; --line:#DEE1DE;
+  /* verdicts (base + bright for glow/stamps) */
+  --present:#0E7C70; --present-bright:#16A394;   /* PRESENT teal */
+  --ghost:#9B2A34;   --ghost-bright:#C8434E;     /* GHOST oxblood — signature "gotcha" */
+  --unreach:#7A828E;                              /* UNREACHABLE slate */
+  --uncertain:#B45309;                            /* UNCERTAIN amber-clay */
+  /* type — none is Inter / Plus Jakarta */
+  --font-display:"Newsreader",Georgia,serif;
+  --font-body:"Public Sans",ui-sans-serif,system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+  --fs-hero:clamp(28px,3vw,44px); --fs-dial:clamp(22px,2.1vw,30px); --fs-body:15px; --fs-mono:12px;
+  /* full-bleed layout */
+  --wrap-max:1760px; --pad:clamp(16px,2.4vw,40px);
+  --radius:6px; --pill:2px; --stamp-tilt:-3deg;
+  /* motion */
+  --dur-stamp:340ms; --dur-type:26ms; --dur-node:520ms;
+}
+body{background:var(--bone);color:var(--ink);font-family:var(--font-body);font-size:var(--fs-body);margin:0;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--font-display);font-weight:500;letter-spacing:-.01em;margin:0}
+.mono,.transcript,.evidence,.phone,.conf{font-family:var(--font-mono);font-size:var(--fs-mono)}
+
+/* verdict stamp — flat matte ink, slight tilt, pop-in on resolve (NOT a glossy wax seal) */
+.stamp{font-family:var(--font-mono);font-weight:500;letter-spacing:.07em;text-transform:uppercase;
+  border:1.5px solid currentColor;border-radius:var(--pill);padding:3px 9px;display:inline-block;transform:rotate(var(--stamp-tilt))}
+.stamp--present{color:var(--present)} .stamp--ghost{color:var(--ghost)} .stamp--unreach{color:var(--unreach)}
+@keyframes stamp-in{0%{transform:rotate(var(--stamp-tilt)) scale(1.3);opacity:0}60%{transform:rotate(var(--stamp-tilt)) scale(.95)}100%{transform:rotate(var(--stamp-tilt)) scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}

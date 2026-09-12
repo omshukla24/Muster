@@ -1,0 +1,50 @@
+[
+  {
+    "id": "SELL-501",
+    "name": "Bharat Agro Organic Produce",
+    "phone": "+919711002201",
+    "claimed_status": "Gold Verified Merchant",
+    "category": "Farm Direct Foods",
+    "address": "APMC Yard, Nashik, Maharashtra"
+  },
+  {
+    "id": "SELL-502",
+    "name": "Kashmir Pashmina Heritage Craft",
+    "phone": "+919711002202",
+    "claimed_status": "Gold Verified Merchant",
+    "category": "Artisan Textiles",
+    "address": "Lal Chowk, Srinagar, J&K"
+  },
+  {
+    "id": "SELL-503",
+    "name": "Deccan Electronics Wholesale",
+    "phone": "+919711002203",
+    "claimed_status": "Gold Verified Merchant",
+    "category": "Consumer Electronics",
+    "address": "Koti, Hyderabad, Telangana"
+  },
+  {
+    "id": "SELL-504",
+    "name": "Jaipur Blue Pottery Collective",
+    "phone": "+919711002204",
+    "claimed_status": "Gold Verified Merchant",
+    "category": "Home & Living",
+    "address": "Sanganer, Jaipur, Rajasthan"
+  },
+  {
+    "id": "SELL-505",
+    "name": "AyurVeda Pure Naturals",
+    "phone": "+919711002205",
+    "claimed_status": "Gold Verified Merchant",
+    "category": "Herbal & Wellness",
+    "address": "Fort Kochi, Ernakulam, Kerala"
+  },
+  {
+    "id": "SELL-506",
+    "name": "Prime Industrial Tool Supplies",
+    "phone": "+919711002206",
+    "claimed_status": "Gold Verified Merchant",
+    "category": "Industrial Hardware",
+    "address": "Peenya Industrial Area, Bengaluru"
+  }
+]

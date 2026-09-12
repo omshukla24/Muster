@@ -1,0 +1,66 @@
+[
+  {
+    "id": "THER-101",
+    "name": "Dr. Ananya Sharma, Clinical Psychologist",
+    "phone": "+919811223301",
+    "claimed_status": "In-Network Tier 1",
+    "category": "CBT & Anxiety",
+    "address": "Defence Colony, New Delhi"
+  },
+  {
+    "id": "THER-102",
+    "name": "MindWell Psychotherapy Associates",
+    "phone": "+919811223302",
+    "claimed_status": "In-Network Tier 1",
+    "category": "Adolescent & Family",
+    "address": "Koramangala, Bengaluru, Karnataka"
+  },
+  {
+    "id": "THER-103",
+    "name": "Dr. Rohit Deshmukh, MD Psychiatry",
+    "phone": "+919811223303",
+    "claimed_status": "In-Network Tier 1",
+    "category": "Depression & Mood Disorders",
+    "address": "Bandra West, Mumbai, Maharashtra"
+  },
+  {
+    "id": "THER-104",
+    "name": "Zenith Behavioral Health Clinic",
+    "phone": "+919811223304",
+    "claimed_status": "In-Network Tier 1",
+    "category": "Addiction Recovery",
+    "address": "Banjara Hills, Hyderabad, Telangana"
+  },
+  {
+    "id": "THER-105",
+    "name": "Prism Child Development Centre",
+    "phone": "+919811223305",
+    "claimed_status": "In-Network Tier 1",
+    "category": "Neurodivergence & Speech",
+    "address": "Alwarpet, Chennai, Tamil Nadu"
+  },
+  {
+    "id": "THER-106",
+    "name": "Dr. Meera Sen, Counseling Specialist",
+    "phone": "+919811223306",
+    "claimed_status": "In-Network Tier 1",
+    "category": "Trauma & EMDR",
+    "address": "Ballygunge, Kolkata, West Bengal"
+  },
+  {
+    "id": "THER-107",
+    "name": "InnerSpace Wellness Studio",
+    "phone": "+919811223307",
+    "claimed_status": "In-Network Tier 1",
+    "category": "Stress & Burnout",
+    "address": "Koregaon Park, Pune, Maharashtra"
+  },
+  {
+    "id": "THER-108",
+    "name": "Harmony Psychiatric Clinic",
+    "phone": "+919811223308",
+    "claimed_status": "In-Network Tier 1",
+    "category": "Geriatric Mental Health",
+    "address": "Sector 22, Chandigarh"
+  }
+]

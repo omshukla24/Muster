@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muster — Live Audit Ledger</title>
+<meta name="description" content="Full-bleed responsive live directory audit powered by CALL-E. Dark switchboard centerpiece, ghost-rate dial, telegraph transcripts, and ink-stamp verdicts.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <!-- Top Bar -->
+  <div class="top">
+    <div class="logo">
+      <h1>Muster</h1>
+      <span class="tag">Directory ghost-rate auditor</span>
+    </div>
+    <div class="live">
+      <div>Calls placed<b id="mCalls">0</b></div>
+      <div>Elapsed<b id="mElapsed">0.0s</b></div>
+      <div>Status<b class="on" id="mStatus">Ready</b></div>
+    </div>
+  </div>
+
+  <!-- Hero: Ghost-Rate Dial + Switchboard Centerpiece -->
+  <div class="hero">
+    <!-- Left: Ghost-Rate Dial -->
+    <div class="panel dialcard">
+      <div>
+        <div class="kicker">Network adequacy</div>
+        <div class="dialwrap">
+          <svg class="dial" viewBox="0 0 200 200" aria-hidden="true">
+            <circle cx="100" cy="100" r="82" fill="none" stroke="#e8eae7" stroke-width="16"/>
+            <circle id="arc" cx="100" cy="100" r="82" fill="none" stroke="var(--ghost)" stroke-width="16"
+              stroke-linecap="round" transform="rotate(-90 100 100)"
+              stroke-dasharray="515" stroke-dashoffset="515"/>
+            <text class="pct" id="dialPct" x="100" y="98" text-anchor="middle" font-size="46">0%</text>
+            <text class="lbl" id="dialSub" x="100" y="122" text-anchor="middle" font-size="11">ghost rate</text>
+          </svg>
+          <div>
+            <div class="headline"><b id="hlGhost">—</b> <span id="hlRest">of 12 listed are ghosts</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="brk">
+        <div class="row">
+          <span class="k"><i style="background:var(--present)"></i>Present</span>
+          <span class="bar"><span id="bPresent" style="background:var(--present)"></span></span>
+          <span class="n" id="nPresent">0</span>
+        </div>
+        <div class="row">
+          <span class="k"><i style="background:var(--ghost)"></i>Ghost</span>
+          <span class="bar"><span id="bGhost" style="background:var(--ghost)"></span></span>
+          <span class="n" id="nGhost">0</span>
+        </div>
+        <div class="row">
+          <span class="k"><i style="background:var(--unreach)"></i>Unreachable</span>
+          <span class="bar"><span id="bUnreach" style="background:var(--unreach)"></span></span>
+          <span class="n" id="nUnreach">0</span>
+        </div>
+      </div>
+    </div>
+
+      <!-- Right: Dark Switchboard Network Centerpiece -->
+    <div class="panel board">
+      <div class="bhead">
+        <span class="kicker">Live switchboard</span>
+        <span class="st" id="boardSt">US In-Network Providers · 12</span>
+      </div>
+      <svg id="net" viewBox="0 0 720 460" aria-hidden="true"></svg>
+      <div class="grain"></div>
+      <div class="node-tooltip" id="nodeTooltip"></div>
+    </div>
+  </div>
+
+  <!-- Controls Strip -->
+  <div class="controls">
+    <button class="run" id="runBtn">▶ Run audit</button>
+    <button class="pause-btn disabled" id="pauseBtn" title="Pause or step through active audit">⏸ Pause</button>
+    <span class="chip live" id="modeChip" title="Click to toggle between Mock Rehearsal and Live CALL-E">◉ Mock Rehearsal</span>
+    <span class="chip" id="dirChip">
+      <select id="presetSelect" aria-label="Target directory">
+        <option value="us_insurer_network" selected>US In-Network Providers (12) · Hero</option>
+        <option value="marketplace_sellers">Verified Marketplace Merchants (6)</option>
+        <option value="hospitals_pmjay">PM-JAY Empanelled Hospitals (12)</option>
+        <option value="therapists_network">Mental Health Provider Network (8)</option>
+      </select>
+    </span>
+    <div class="speed-group" id="speedGroup" title="Rehearsal playback speed">
+      <button class="speed-btn active" data-speed="1">1x</button>
+      <button class="speed-btn" data-speed="2">2x</button>
+      <button class="speed-btn" data-speed="0">Instant</button>
+    </div>
+    <label class="chip" for="fileInput" title="Upload custom CSV or JSON directory" style="cursor:pointer;">
+      <input type="file" id="fileInput" accept=".csv,.json" style="display:none;">
+      📁 Upload file
+    </label>
+    <span class="spacer"></span>
+    <button class="dl disabled" id="dlCsv">↓ CSV</button>
+    <button class="dl disabled" id="dlJson">↓ JSON</button>
+    <button class="dl disabled" id="dlMd">↓ Audit certificate</button>
+  </div>
+
+  <!-- Ledger Roll -->
+  <div class="ledger" id="ledger"></div>
+
+  <!-- Footnote -->
+  <div class="foot">
+    <strong>Muster</strong> audits claimed provider rolls by batch-calling with CALL-E and asking a single non-invasive qualifying question. Classifications are certified with verbatim spoken evidence quotes. Unrun rows stay queued; confirmed defunct listings crack and fall away upon the Reveal finale.
+  </div>
+</div>
+
+<!-- Evidence Modal & Scrim -->
+<div class="scrim" id="scrim">
+  <div class="modal" id="modal"></div>
+</div>
+
+<!-- Credit Guard Live Modal -->
+<div class="scrim" id="liveGuardScrim">
+  <div class="modal credit-guard-modal" id="liveGuardModal">
+    <div class="mh">
+      <div class="nm">
+        ⚠️ Live CALL-E Credit Guard
+        <span>Real cellular telephone calls will be placed</span>
+      </div>
+      <button class="x" id="liveGuardCloseBtn">&times;</button>
+    </div>
+    <div style="margin: 16px 0; font-size: 13.5px; line-height: 1.5;">
+      <p style="margin-top: 0;">You are about to launch a <strong>LIVE batch audit</strong> via CALL-E. This will place actual phone calls to <strong><span id="liveGuardCount">12</span> destination numbers</strong>.</p>
+      <div style="background: #FFF4F2; border: 1px solid #F5C6CB; border-radius: 4px; padding: 12px; margin: 12px 0;">
+        <strong style="color: var(--ghost);">Metered Usage Warning:</strong>
+        <div id="liveGuardCreditNote" style="margin-top: 4px; color: #721c24; font-size: 12.5px;">
+          Live calls consume credits from your metered account (~34 credits per minute). Keep calls short.
+        </div>
+      </div>
+      <p style="margin-bottom: 0; color: var(--muted); font-size: 12px;">
+        To conduct zero-cost offline demo rehearsals, keep <em>Mock Rehearsal</em> mode selected.
+      </p>
+    </div>
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+      <button class="dl" id="liveGuardCancelBtn">Cancel (Keep Mock)</button>
+      <button class="run" id="liveGuardConfirmBtn" style="background: var(--ghost); color: #fff;">Confirm LIVE Audit</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

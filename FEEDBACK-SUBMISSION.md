@@ -2,7 +2,7 @@
 
 I built a directory auditor on CALL-E for the hackathon and placed real calls. English worked great. Stuff I ran into, roughly worst first:
 
-**Hindi voice is broken.** It's listed as supported for India, but on a real Hindi call the bot just looped broken syllables ("क्या…", "क्य…") for almost seven minutes and never finished a sentence. The person on the line couldn't follow it. English on the exact same setup was flawless. I have the recording.
+**Hindi voice is broken.** It's listed as supported for India, but on a real Hindi call the bot just looped broken syllables ("क्या…", "क्य…") for 2 minutes and 35 seconds and never finished a sentence. The person on the line couldn't follow it. English on the exact same setup was flawless. I have the recording.
 
 **Got charged for calls that never connected.** A call that was rejected instantly (0 seconds, never rang through) still cost about 6 credits.
 

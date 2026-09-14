@@ -1,10 +1,6 @@
 # Muster
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/omshukla24/Muster/main/muster/app/static/img/banner.png" alt="Muster Banner" width="100%" onerror="this.style.display='none'"/>
-</p>
-
-<p align="center">
   <a href="https://github.com/omshukla24/Muster/actions"><img src="https://img.shields.io/badge/Test_Suite-33_Passed_(100%25)-0e7090?style=for-the-badge&logo=pytest&logoColor=white" alt="Tests" /></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.10+-3776ab?style=for-the-badge&logo=python&logoColor=white" alt="Python Version" /></a>
   <a href="https://www.calle.ai"><img src="https://img.shields.io/badge/Telephony_Gateway-CALL--E_REST_%2F_SSE-6366f1?style=for-the-badge&logo=twilio&logoColor=white" alt="Telephony Gateway" /></a>

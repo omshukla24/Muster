@@ -837,6 +837,7 @@ a {
   font-size: 12.5px; letter-spacing: .05em; text-transform: uppercase;
   font-weight: 600; display: flex; align-items: center; gap: 8px;
 }
+.livebanner[hidden] { display: none !important; }
 .livebanner.err { background: var(--uncertain); text-transform: none; letter-spacing: .02em; }
 body.livemode .top { border-bottom-color: var(--ghost); }
 .run.livego { background: var(--ghost); }

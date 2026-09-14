@@ -160,6 +160,8 @@ class CalleClient:
             env=self._get_env(),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             check=False,
         )
         out = (proc.stdout or "").strip()
@@ -198,48 +200,54 @@ class CalleClient:
             "--region", target_region,
         ]
 
-        try:
-            start_res = await asyncio.to_thread(self._run_cli, start_args)
-        except Exception as exc:
-            # Resilient fallback: report a clean UNREACHABLE rather than crashing.
+        start_res = {}
+        start_sc = {}
+        run_id = None
+        last_exc = None
+
+        for attempt in range(2):
+            try:
+                start_res = await asyncio.to_thread(self._run_cli, start_args)
+                start_sc = _unwrap_structured(start_res)
+                run_id = start_sc.get("run_id") or start_res.get("run_id") or start_res.get("id")
+
+                if not run_id:
+                    # Fallback if a plan (not a run) came back
+                    plan_id = start_sc.get("plan_id") or start_res.get("plan_id")
+                    confirm_token = start_sc.get("confirm_token") or start_res.get("confirm_token")
+                    if plan_id and confirm_token:
+                        run_res = await asyncio.to_thread(
+                            self._run_cli,
+                            ["call", "run", "--plan-id", str(plan_id), "--confirm-token", str(confirm_token)]
+                        )
+                        run_sc = _unwrap_structured(run_res)
+                        run_id = run_sc.get("run_id")
+                        start_res, start_sc = run_res, run_sc
+
+                if run_id:
+                    break
+                elif attempt == 0:
+                    # Brief carrier release backoff before retry
+                    await asyncio.sleep(3.0)
+            except Exception as exc:
+                last_exc = exc
+                if attempt == 0:
+                    await asyncio.sleep(3.0)
+                    continue
+
+        if not run_id:
             duration = time.time() - start_time
+            err_msg = str(last_exc) if last_exc else "CALL-E did not create a call run for this number (insufficient credits or carrier busy)."
+            print(f"[CalleClient] ERROR: Failed to start call to {phone}: {err_msg}", flush=True)
             return {
                 "run_id": f"err-{int(start_time)}",
                 "status": "ERROR",
                 "extracted": {"reached_human": False,
-                              "stated_reason": "The call could not be placed (system or network error)."},
+                              "stated_reason": f"The call could not be placed to {phone}: {err_msg}"},
                 "evidence": ["The call could not be placed — no connection was established."],
                 "transcript": "",
                 "duration_seconds": round(duration, 2),
-                "raw": {"error": str(exc)},
-            }
-
-        start_sc = _unwrap_structured(start_res)
-        run_id = start_sc.get("run_id") or start_res.get("run_id") or start_res.get("id")
-
-        if not run_id:
-            # Fallback if a plan (not a run) came back
-            plan_id = start_sc.get("plan_id") or start_res.get("plan_id")
-            confirm_token = start_sc.get("confirm_token") or start_res.get("confirm_token")
-            if plan_id and confirm_token:
-                run_res = await asyncio.to_thread(
-                    self._run_cli,
-                    ["call", "run", "--plan-id", str(plan_id), "--confirm-token", str(confirm_token)]
-                )
-                run_sc = _unwrap_structured(run_res)
-                run_id = run_sc.get("run_id")
-                start_res, start_sc = run_res, run_sc
-
-        if not run_id:
-            return {
-                "run_id": f"unconfirmed-{int(start_time)}",
-                "status": "ERROR",
-                "extracted": {"reached_human": False,
-                              "stated_reason": "The call could not be started."},
-                "evidence": ["CALL-E did not create a call run for this number."],
-                "transcript": "",
-                "duration_seconds": round(time.time() - start_time, 2),
-                "raw": start_res,
+                "raw": start_res or {"error": err_msg},
             }
 
         # If call start already returned a terminal run, use it directly.
@@ -328,12 +336,15 @@ class CalleClient:
         out_duration = call_duration if isinstance(call_duration, (int, float)) else duration
 
         # Collapse no-connect / non-answer outcomes to a single UNREACHABLE value.
-        no_connect = (hangup == "bycallee") or (isinstance(call_duration, (int, float)) and call_duration == 0)
+        no_connect = (not connected) and (
+            (hangup == "bycallee") or (isinstance(call_duration, (int, float)) and call_duration == 0)
+        )
         if status in [
             "BYCALLEE", "NO_ANSWER", "NO ANSWER", "BUSY", "CANCELED",
             "CANCELLED", "DECLINED", "UNANSWERED", "EXPIRED",
         ] or (status in ("FAILED", "ERROR") and not connected) or no_connect:
-            status = "NO ANSWER"
+            if not connected:
+                status = "NO ANSWER"
 
         return {
             "run_id": run_id,

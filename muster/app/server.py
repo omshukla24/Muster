@@ -70,7 +70,7 @@ def get_auth_status():
     try:
         import subprocess
         from muster.calle_client import _calle_argv
-        proc = subprocess.run(_calle_argv(["auth", "status", "--json"]), capture_output=True, text=True, check=False)
+        proc = subprocess.run(_calle_argv(["auth", "status", "--json"]), capture_output=True, text=True, encoding="utf-8", errors="replace", check=False)
         out = proc.stdout.strip()
         data = json.loads(out)
         usable = bool(data.get("usable", False))
@@ -121,6 +121,24 @@ def get_presets():
             "sector": "US_INSURER",
             "filename": "therapists_network.json",
             "default_goal": "Hello, calling to verify your in-network provider listing. Are you currently accepting new insurance patients for therapy?"
+        },
+        {
+            "id": "live_demo_audit",
+            "name": "Live Telephony Verification (1 Facility - Hero)",
+            "count": 1,
+            "category": "Live Clinic Verification",
+            "sector": "US_INSURER",
+            "filename": "live_demo_audit.json",
+            "default_goal": "Hello, I am calling to verify directory network status. Are you currently in-network and accepting new patients? If asked who is calling or if this is an insurance company, politely state that you are calling for routine directory verification to confirm active provider network status."
+        },
+        {
+            "id": "live_demo_audit_3",
+            "name": "Live Telephony Verification (3 US Facilities)",
+            "count": 3,
+            "category": "Live Hospital & Clinic Audit",
+            "sector": "US_INSURER",
+            "filename": "live_demo_audit_3.json",
+            "default_goal": "Hello, I am calling to verify directory network status. Are you currently in-network and accepting new patients? If asked who is calling or if this is an insurance company, politely state that you are calling for routine directory verification to confirm active provider network status."
         }
     ]
 
@@ -132,6 +150,8 @@ def load_preset(preset_id: str):
         "us_insurer_network": SAMPLE_DATA_DIR / "us_insurer_network.json",
         "marketplace_sellers": SAMPLE_DATA_DIR / "marketplace_sellers.json",
         "therapists_network": SAMPLE_DATA_DIR / "therapists_network.json",
+        "live_demo_audit": SAMPLE_DATA_DIR / "live_demo_audit.json",
+        "live_demo_audit_3": SAMPLE_DATA_DIR / "live_demo_audit_3.json",
     }
     target = file_map.get(preset_id)
     if not target or not target.exists():
@@ -169,10 +189,12 @@ async def _run_audit_background(
         return
 
     is_live = (mode.lower() == "live")
+    # Live calls MUST run strictly sequentially (concurrency=1) to prevent SIP line collision
+    actual_concurrency = 1 if is_live else max(1, concurrency)
     client = CalleClient() if is_live else MockCalleClient(artificial_delay_sec=0.8)
     engine = AuditEngine(
         client=client,
-        concurrency=concurrency,
+        concurrency=actual_concurrency,
         language=language,
         sector=sector,
     )

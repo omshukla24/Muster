@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Muster — Premiere Pro "Don't Look Basic" Masterclass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090b10;
+      --card-bg: #121620;
+      --card-border: #222938;
+      --accent: #d9483b;
+      --emerald: #10b981;
+      --cyan: #0ea5e9;
+      --purple: #8b5cf6;
+      --amber: #f59e0b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      padding: 30px;
+      line-height: 1.6;
+    }
+
+    .container { max-width: 1300px; margin: 0 auto; }
+    
+    header {
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h1 {
+      font-family: 'Newsreader', serif;
+      font-size: 36px;
+      color: #fff;
+    }
+
+    .tag {
+      background: rgba(217, 72, 59, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(217, 72, 59, 0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    h2 {
+      font-size: 18px;
+      color: #fff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Timeline visual */
+    .timeline-strip {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #0d1017;
+      border: 1px solid #1e2433;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+    .track {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .track-label {
+      width: 45px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    .track-block {
+      flex: 1;
+      height: 32px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+    .track-v2 { background: #3b2a54; color: #c084fc; border-left: 4px solid #a855f7; }
+    .track-v1 { background: #1e3a5f; color: #60a5fa; border-left: 4px solid #3b82f6; }
+    .track-a1 { background: #164e3f; color: #34d399; border-left: 4px solid #10b981; }
+    .track-a2 { background: #5c3a1e; color: #fbbf24; border-left: 4px solid #f59e0b; }
+    .track-a3 { background: #3f1d24; color: #f87171; border-left: 4px solid #ef4444; }
+
+    .step-item {
+      padding: 14px 0;
+      border-bottom: 1px solid #1b212f;
+    }
+    .step-item:last-child { border-bottom: none; }
+    .step-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .step-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: #171b26;
+      color: var(--cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .keyframe-box {
+      background: #0a0d14;
+      border: 1px solid #1e2535;
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <h1>Premiere Pro "Don't Look Basic" Blueprint</h1>
+      <div style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">
+        Turn a simple screen capture into an Apple / Silicon Valley caliber demo video in under 45 minutes.
+      </div>
+    </div>
+    <div class="tag">Hackathon Quality Lock</div>
+  </header>
+
+  <!-- Visual Timeline Layout -->
+  <div class="card" style="margin-bottom: 24px;">
+    <h2>🎚️ Your 5-Track Premiere Pro Sequence Layout</h2>
+    <div class="timeline-strip">
+      <div class="track">
+        <span class="track-label">V2</span>
+        <div class="track-block track-v2">Lower Thirds (Captions) · Callout Arrows · Red LIVE Vignette Pulse</div>
+      </div>
+      <div class="track">
+        <span class="track-label">V1</span>
+        <div class="track-block track-v1">Screen Recordings (60 FPS) · Punch-In Zooms (125%) · Speed Ramps (200%)</div>
+      </div>
+      <div class="track">
+        <span class="track-label">A1</span>
+        <div class="track-block track-a1">Main Voiceover (Recorded on Phone / Mic) · EQ Vocal Enhancer (-3dB to -6dB peak)</div>
+      </div>
+      <div class="track">
+        <span class="track-label">A2</span>
+        <div class="track-block track-a2">Sound Effects: UI Clicks, Whooshes, Sub-Bass Boom (Reveal Finale), Real Phone Audio</div>
+      </div>
+      <div class="track">
+        <span class="track-label">A3</span>
+        <div class="track-block track-a3">Tech / Lo-Fi Background Music (Constant -24dB under voice, -14dB during Reveal pause)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    
+    <!-- Column 1: Pacing & Zooms -->
+    <div class="card">
+      <h2>🔍 The 4 Keyframe Punch-In Zooms (Fixes "Basic Video")</h2>
+      
+      <div class="step-item">
+        <div class="step-title">
+          <span>1. Scene 1 (0:05): Ghost Problem Zoom</span>
+          <span style="color: var(--cyan);">0:05 – 0:10</span>
+        </div>
+        <div class="step-desc">
+          When mentioning "Dead numbers & ghost listings", zoom in on a row or table.
+          <div class="keyframe-box">
+            Scale: 100% → 125% (Position: X: 960, Y: 600)<br>
+            Keyframe Interpolation: Right-click keyframe → <strong>Temporal Interpolation → Continuous Bezier (Smooth Ease)</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-title">
+          <span>2. Scene 3 (0:30): Switchboard Centerpiece Pulse</span>
+          <span style="color: var(--cyan);">0:30 – 0:45</span>
+        </div>
+        <div class="step-desc">
+          Punch directly into the circular dark switchboard as amber nodes are pulsing.
+          <div class="keyframe-box">
+            Scale: 100% → 130% centered on the SVG operator hub.<br>
+            Apply Speed Ramp: Cut the middle 10 seconds of dialing → Set Speed to <code>200%</code>.
+          </div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-title">
+          <span>3. Scene 4 (0:56): "The Reveal" Bass Drop & Finale</span>
+          <span style="color: var(--cyan);">0:55 – 1:05</span>
+        </div>
+        <div class="step-desc">
+          The moment ghost nodes crack and drop:
+          <div class="keyframe-box">
+            Drop in a <strong>Sub-Bass Boom / Whoosh SFX</strong> on Track A2.<br>
+            Pause voiceover for 1.5 seconds so the judge watches the nodes drop!<br>
+            Then zoom in to 130% on the circular oxblood <strong>Ghost Rate Dial (58.3%)</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-title">
+          <span>4. Scene 5 (1:35): CALL-E Dashboard Proof Callout</span>
+          <span style="color: var(--cyan);">1:35 – 1:42</span>
+        </div>
+        <div class="step-desc">
+          Cut to the CALL-E Airudder portal showing the real <code>call_id</code> and duration.
+          <div class="keyframe-box">
+            Add a red bounding box / arrow graphic pointing to <code>call_id</code>.<br>
+            Lower third on Track V2: <strong>CALLED AT RUNTIME · REAL CALL-E RECORD</strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Column 2: Audio & Polish -->
+    <div class="card">
+      <h2>🎙️ Audio & Color Grading Secrets</h2>
+      
+      <div class="step-item">
+        <div class="step-title">
+          <span>Voiceover Processing (Make Phone Audio Sound Like Studio)</span>
+        </div>
+        <div class="step-desc">
+          Select Track A1 → Open <strong>Essential Sound</strong> panel:<br>
+          1. Assign as <strong>Dialogue</strong>.<br>
+          2. Check <strong>Loudness → Auto-Match</strong> (-23 LUFS).<br>
+          3. Check <strong>Clarity → Dynamics</strong> (set slider to 2.5).<br>
+          4. Check <strong>EQ</strong> → choose <strong>Warm Voice</strong> or <strong>Subtle Boost</strong>.
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-title">
+          <span>Sound Effects Placement (Track A2)</span>
+        </div>
+        <div class="step-desc">
+          • <strong>0:25:</strong> Crisp mouse click when pressing "Run Audit".<br>
+          • <strong>0:55:</strong> Deep cinematic bass boom when ghost nodes break.<br>
+          • <strong>1:12:</strong> Quick warning whoosh when flipping to LIVE mode.<br>
+          • <strong>1:25:</strong> Real phone dial tone + operator's real spoken sentence!
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-title">
+          <span>Color & Text Sharpness (Lumetri Color)</span>
+        </div>
+        <div class="step-desc">
+          Add an Adjustment Layer across V1:<br>
+          • <strong>Contrast:</strong> +12<br>
+          • <strong>Highlights:</strong> +8<br>
+          • <strong>Shadows / Blacks:</strong> -6 (gives dark UI deep inky blacks).<br>
+          • <strong>Sharpen:</strong> +15 (ensures ledger text and numbers look razor-sharp on 1080p).
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-title">
+          <span>Export Settings for YouTube / Devpost</span>
+        </div>
+        <div class="step-desc">
+          Press <code>Ctrl + M</code> (Export):<br>
+          • Format: <strong>H.264</strong><br>
+          • Preset: <strong>Match Source - Adaptive High Bitrate</strong><br>
+          • Target Bitrate: <strong>16 - 20 Mbps</strong> (VBR 1 pass)<br>
+          • Audio: <strong>AAC 320 kbps, 48 kHz, Stereo</strong>.
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Final Sanity Checklist -->
+  <div class="card">
+    <h2>✅ Pre-Render Sanity Checklist</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; font-size: 13px;">
+      <div style="background: #0d1017; padding: 12px; border-radius: 6px;">
+        <strong style="color: var(--emerald);">✓ Exact Length:</strong><br>
+        Between 1:45 and 2:15. Hard cutoff at 3:00.
+      </div>
+      <div style="background: #0d1017; padding: 12px; border-radius: 6px;">
+        <strong style="color: var(--emerald);">✓ Proof Shown:</strong><br>
+        CALL-E dashboard <code>call_id</code> and Live green PRESENT are clearly visible.
+      </div>
+      <div style="background: #0d1017; padding: 12px; border-radius: 6px;">
+        <strong style="color: var(--emerald);">✓ Audio Balance:</strong><br>
+        Voice is clear and loud (-6dB). Music is quiet in background (-24dB).
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -140,7 +140,19 @@ def parse_directory_data(data: Union[List[Dict[str, Any]], str], is_csv: bool = 
         content = data.strip()
         if not content:
             return []
-        if is_csv or content.startswith("name") or content.startswith('"') or "," in content.split("\n")[0]:
+        if not is_csv and (content.startswith("[") or content.startswith("{")):
+            try:
+                parsed = json.loads(content)
+                if isinstance(parsed, list):
+                    raw_rows = parsed
+                elif isinstance(parsed, dict) and "entries" in parsed:
+                    raw_rows = parsed["entries"]
+                else:
+                    raise ValueError("JSON must contain an array of directory entries or an 'entries' key.")
+            except json.JSONDecodeError:
+                reader = csv.DictReader(io.StringIO(content))
+                raw_rows = [row for row in reader]
+        elif is_csv or content.startswith("name") or content.startswith('"') or "," in content.split("\n")[0]:
             reader = csv.DictReader(io.StringIO(content))
             raw_rows = [row for row in reader]
         else:
@@ -153,7 +165,6 @@ def parse_directory_data(data: Union[List[Dict[str, Any]], str], is_csv: bool = 
                 else:
                     raise ValueError("JSON must contain an array of directory entries or an 'entries' key.")
             except json.JSONDecodeError as exc:
-                # Fallback to CSV attempt
                 reader = csv.DictReader(io.StringIO(content))
                 raw_rows = [row for row in reader]
 

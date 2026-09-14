@@ -266,6 +266,16 @@ async function handleFileUpload(e) {
     }
     state.entries = await res.json();
     dom.boardSt.textContent = `${file.name} · ${state.entries.length}`;
+
+    let customOpt = dom.presetSelect.querySelector('option[value="custom_upload"]');
+    if (!customOpt) {
+      customOpt = document.createElement('option');
+      customOpt.value = 'custom_upload';
+      dom.presetSelect.appendChild(customOpt);
+    }
+    customOpt.textContent = `Custom: ${file.name} (${state.entries.length})`;
+    customOpt.selected = true;
+
     resetState();
     buildSwitchboard();
     buildLedger();
@@ -384,7 +394,7 @@ function buildSwitchboard() {
 
       dom.nodeTooltip.innerHTML = `
         <div class="tt-title">${escapeHtml(entry.name)}</div>
-        <div class="tt-meta">${escapeHtml(entry.phone)} · ${escapeHtml(entry.address || entry.category || '')}</div>
+        <div class="tt-meta">${escapeHtml(maskPhone(entry.phone))} · ${escapeHtml(entry.address || entry.category || '')}</div>
         <span class="tt-badge" style="background:${badgeCol}22; color:${badgeCol}; border:1px solid ${badgeCol}55;">${statusText}</span>
       `;
       positionTooltip(evt);
@@ -477,7 +487,7 @@ function buildLedger() {
       <div class="idx">${idxStr}</div>
       <div>
         <div class="nm">${escapeHtml(entry.name)}</div>
-        <div class="ph">${escapeHtml(entry.phone)}</div>
+        <div class="ph" title="Masked for directory privacy">${escapeHtml(maskPhone(entry.phone))}</div>
       </div>
       <div class="claim">${escapeHtml(entry.claimed_status)}${loc ? ` · ${escapeHtml(loc)}` : ''}</div>
       <div class="verdict">
@@ -506,8 +516,14 @@ function buildLedger() {
 function setDial(present, ghost, unreach, total) {
   const gr = total > 0 ? Math.round((ghost / total) * 100) : 0;
   dom.arc.setAttribute('stroke-dashoffset', 515 - (515 * gr / 100));
+  const anyDone = (present + ghost + unreach) > 0;
   dom.dialPct.textContent = `${gr}%`;
-  dom.hlGhost.textContent = ghost > 0 ? ghost : '—';
+  dom.hlGhost.textContent = anyDone ? String(ghost) : '—';
+  if (anyDone) {
+    dom.dialPct.style.fill = gr > 0 ? 'var(--ghost)' : 'var(--present)';
+  } else {
+    dom.dialPct.style.fill = '';
+  }
 
   dom.nPresent.textContent = present;
   dom.nGhost.textContent = ghost;
@@ -622,7 +638,7 @@ async function executeAudit() {
 
   // Sector and Goal: English hero by default
   const meta = state.presets.find(p => p.id === state.selectedPresetId);
-  const goal = meta?.default_goal || "Hello, I am calling to verify directory network status. Are you currently in-network and accepting new patients?";
+  const goal = meta?.default_goal || "Hello, I am calling to verify directory network status. Are you currently in-network and accepting new patients? If asked who is calling or if this is an insurance company, politely state that you are calling for routine directory verification to confirm active provider network status.";
   const language = 'en';
   const sector = meta?.sector || 'US_INSURER';
 
@@ -630,7 +646,7 @@ async function executeAudit() {
     entries: state.entries,
     mode: state.mode,
     goal: goal,
-    concurrency: 2,
+    concurrency: state.mode === 'live' ? 1 : 2,
     language: language,
     sector: sector,
   };
@@ -734,7 +750,8 @@ function handleProgressEvent(event) {
   }
 
   if (summary) {
-    setDial(summary.present_count, summary.ghost_count, summary.unreachable_count, summary.total);
+    const unverifiedTotal = (summary.unreachable_count || 0) + (summary.uncertain_count || 0);
+    setDial(summary.present_count, summary.ghost_count, unverifiedTotal, summary.total);
     dom.mCalls.textContent = summary.completed;
   }
 }
@@ -773,7 +790,7 @@ function animateCalling(entryId, on) {
       c.querySelector('.txt').textContent = 'calling…';
 
       // Telegraph typing effect (adjusted by state.speed)
-      const phone = state.entries[idx].phone;
+      const phone = maskPhone(state.entries[idx].phone);
       const full = `  ▸ dialing ${phone}…`;
       let s = 0;
       clearInterval(n._typer);
@@ -899,11 +916,29 @@ function finishAudit() {
     tierCol = '#d97706';
   }
 
-  dom.boardSt.innerHTML = `<b style="color:#C8434E">${ghostCount} of ${total}</b> = ghost (${ghostPct}%)`;
+  dom.dialPct.textContent = `${ghostPct}%`;
+  dom.dialPct.style.fill = ghostPct > 0 ? 'var(--ghost)' : 'var(--present)';
+  dom.arc.setAttribute('stroke-dashoffset', 515 - (515 * ghostPct / 100));
+  dom.boardSt.innerHTML = `<b style="color:${ghostCount > 0 ? '#C8434E' : 'var(--present)'}">${ghostCount} of ${total}</b> = ghost (${ghostPct}%)`;
   dom.dialSub.textContent = 'ghost rate · final';
 
+  // Smooth counter animation
+  const targetPct = ghostPct;
+  let curr = 0;
+  const step = Math.max(1, Math.floor(targetPct / 15));
+  const intv = setInterval(() => {
+    curr += step;
+    if (curr >= targetPct) {
+      curr = targetPct;
+      clearInterval(intv);
+    }
+    dom.dialPct.textContent = `${curr}%`;
+  }, 25);
+
   // Editorial one-line breakdown
-  dom.hlRest.innerHTML = `of ${total} listed are ghosts<br><span style="display:block; margin-top:5px; font-size:12.5px; font-family:var(--font-mono); color:var(--muted); font-weight:400; line-height:1.4;">A patient must call ~<strong style="color:var(--ink);">${patientCallRatio}</strong> listings to reach 1 real provider · <strong style="color:${tierCol}; letter-spacing:0.04em;">${tier}</strong></span>`;
+  dom.hlGhost.textContent = String(ghostCount);
+  const listingWord = patientCallRatio === '1.0' ? 'listing' : 'listings';
+  dom.hlRest.innerHTML = `of ${total} listed are ghosts<br><span style="display:block; margin-top:5px; font-size:12.5px; font-family:var(--font-mono); color:var(--muted); font-weight:400; line-height:1.4;">A patient must call ~<strong style="color:var(--ink);">${patientCallRatio}</strong> ${listingWord} to reach 1 real provider · <strong style="color:${tierCol}; letter-spacing:0.04em;">${tier}</strong></span>`;
 
   // SET-PIECE: "THE REVEAL"
   // Ghost nodes crack and drop down; ledger ghost rows get struck through
@@ -956,7 +991,8 @@ function openModal(outcome) {
     : outcome.stated_reason || 'Verified operational response.';
 
   const formattedTranscript = (outcome.transcript || '[No audio transcript captured]')
-    .replace(/^(Agent|Reception|Respondent|Operator):/gm, '<em>$1:</em>')
+    .replace(/^\[?(ASSISTANT|Agent|Call[- ]?E)\]?:?/gim, '<span style="color:#60a5fa;font-weight:600;">[ASSISTANT]:</span>')
+    .replace(/^\[?(USER|Callee|Reception|Respondent|Operator)\]?:?/gim, '<span style="color:#34d399;font-weight:600;">[CALLEE]:</span>')
     .replace(/\n/g, '<br>');
 
   const isInsurer = outcome.sector === 'US_INSURER' || ext.in_network !== undefined || ext.accepts_scheme !== undefined;
@@ -980,7 +1016,7 @@ function openModal(outcome) {
     <div class="mh">
       <div class="nm">
         ${escapeHtml(outcome.entry_name)}
-        <span>${escapeHtml(outcome.phone)}</span>
+        <span>${escapeHtml(maskPhone(outcome.phone))}</span>
       </div>
       <div style="display:flex;gap:10px;align-items:center">
         <span class="stamp ${cfg.cls}">${cfg.stamp}</span>
@@ -1008,6 +1044,37 @@ function closeModal() {
 function downloadReport(fmt) {
   if (!state.jobId) return;
   window.open(`/api/audit/report/${state.jobId}/${fmt}`, '_blank');
+}
+
+function maskPhone(phone) {
+  if (!phone) return '';
+  const s = String(phone).trim();
+  const digits = s.replace(/\D/g, '');
+  if (digits.length <= 4) return s;
+
+  // US format: +1XXXXXXXXXX (11 digits starting with 1, or 10 digits)
+  if ((s.startsWith('+1') && digits.length === 11) || digits.length === 10) {
+    const d = digits.length === 11 ? digits.slice(1) : digits;
+    const area = d.slice(0, 3);
+    const last2 = d.slice(-2);
+    return `+1 (${area}) •••-••${last2}`;
+  }
+
+  // India format: +91XXXXXXXXXX
+  if (s.startsWith('+91') && digits.length === 12) {
+    const d = digits.slice(2);
+    const first2 = d.slice(0, 2);
+    const last2 = d.slice(-2);
+    return `+91 ${first2}••••••${last2}`;
+  }
+
+  // Universal fallback for any custom uploaded numbers (keeps first 2-3 and last 2, masks middle with bullets)
+  const preLen = Math.min(3, Math.max(2, Math.floor(digits.length / 4)));
+  const postLen = 2;
+  const pre = (s.startsWith('+') ? '+' : '') + digits.slice(0, preLen);
+  const post = digits.slice(-postLen);
+  const maskCount = Math.max(4, Math.min(8, digits.length - preLen - postLen));
+  return `${pre} ${'•'.repeat(maskCount)} ${post}`;
 }
 
 function escapeHtml(str) {

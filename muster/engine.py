@@ -25,8 +25,8 @@ from muster.calle_client import CalleClient, MockCalleClient
 
 
 DEFAULT_GOAL = (
-    "Hello, I am calling to verify directory network status. "
-    "Are you currently in-network and accepting new patients?"
+    "Hello, I am calling to verify directory network status. Are you currently in-network and accepting new patients? "
+    "If asked who is calling or if this is an insurance company, politely state that you are calling for routine directory verification to confirm active provider network status."
 )
 
 
@@ -42,7 +42,9 @@ class AuditEngine:
         sector: Sector = Sector.US_INSURER,
     ):
         self.client = client or MockCalleClient()
-        self.concurrency = max(1, concurrency)
+        is_live = isinstance(self.client, CalleClient)
+        # Real CALL-E calls must run sequentially (concurrency=1) to avoid SIP line collision
+        self.concurrency = 1 if is_live else max(1, concurrency)
         self.sector = sector
         sector_cfg = SECTOR_DEFAULTS.get(sector, SECTOR_DEFAULTS[Sector.US_INSURER])
         self.default_goal = default_goal or sector_cfg.get("default_goal", DEFAULT_GOAL)
@@ -195,6 +197,10 @@ class AuditEngine:
                         progress_pct=pct,
                     )
                 )
+
+                if not is_mock:
+                    # Carrier SIP trunk line release cooldown
+                    await asyncio.sleep(4.0)
 
         tasks = [asyncio.create_task(audit_single_entry(entry)) for entry in entries]
         

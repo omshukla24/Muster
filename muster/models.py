@@ -119,7 +119,7 @@ SECTOR_DEFAULTS = {
     Sector.US_INSURER: {
         "name": "US Health Insurer Provider Roll",
         "language": "en",
-        "default_goal": "Hello, I am calling to verify directory network status. Are you currently in-network and accepting new patients?",
+        "default_goal": "Hello, I am calling to verify directory network status. Are you currently in-network and accepting new patients? If asked who is calling or if this is an insurance company, politely state that you are calling for routine directory verification to confirm active provider network status.",
     },
     Sector.MARKETPLACE_SELLER: {
         "name": "Verified Marketplace Merchant Roll",

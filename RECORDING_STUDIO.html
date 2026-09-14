@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Muster — Video Production Director & Teleprompter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0c0e14;
+      --card-bg: #141822;
+      --card-border: #23293a;
+      --accent: #d9483b;
+      --accent-glow: rgba(217, 72, 59, 0.25);
+      --emerald: #22c55e;
+      --amber: #f59e0b;
+      --cyan: #06b6d4;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.5;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 30px;
+    }
+
+    .brand-title {
+      font-family: 'Newsreader', serif;
+      font-size: 38px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      color: #fff;
+    }
+
+    .brand-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-red { background: rgba(217,72,59,0.2); color: #f87171; border: 1px solid rgba(217,72,59,0.4); }
+    .badge-green { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .badge-amber { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+
+    .nav-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 30px;
+      background: #10131c;
+      padding: 6px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      width: fit-content;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 1px solid var(--card-border);
+    }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards & Layout */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Scene Table */
+    .scene-box {
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      background: #0f121a;
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .scene-box:hover {
+      border-color: #3b4460;
+    }
+
+    .scene-header {
+      background: #171b26;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .scene-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .scene-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--cyan);
+      background: rgba(6, 182, 212, 0.1);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .scene-body {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1.1fr 1.3fr 0.9fr;
+      gap: 20px;
+    }
+
+    .col-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .screen-action {
+      font-size: 13px;
+      color: var(--text-main);
+      background: #141722;
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 3px solid var(--cyan);
+    }
+
+    .voiceover-box {
+      font-family: 'Newsreader', serif;
+      font-size: 16px;
+      font-style: italic;
+      color: #e2e8f0;
+      line-height: 1.6;
+      background: #141722;
+      padding: 14px;
+      border-radius: 6px;
+      border-left: 3px solid var(--amber);
+      position: relative;
+    }
+
+    .premiere-tip {
+      font-size: 12px;
+      color: #fca5a5;
+      background: rgba(217, 72, 59, 0.08);
+      border: 1px solid rgba(217, 72, 59, 0.2);
+      padding: 12px;
+      border-radius: 6px;
+    }
+
+    /* Teleprompter */
+    .teleprompter-controls {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      background: #171b26;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      border: 1px solid var(--card-border);
+    }
+
+    .timer-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--emerald);
+      min-width: 140px;
+    }
+
+    .btn {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover { background: #1d4ed8; }
+    .btn-red { background: #d9483b; }
+    .btn-red:hover { background: #b91c1c; }
+    .btn-outline { background: transparent; border: 1px solid var(--card-border); color: #fff; }
+    .btn-outline:hover { background: #1e2433; }
+
+    .teleprompter-stage {
+      background: #080a0f;
+      border: 2px solid #202738;
+      border-radius: 12px;
+      padding: 40px;
+      height: 480px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      position: relative;
+    }
+
+    .teleprompter-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 26px;
+      line-height: 1.8;
+      color: #94a3b8;
+      transition: color 0.2s;
+    }
+
+    .teleprompter-text p {
+      margin-bottom: 32px;
+      padding: 12px 18px;
+      border-radius: 8px;
+    }
+
+    .teleprompter-text p.current-beat {
+      color: #ffffff;
+      background: rgba(37, 99, 235, 0.15);
+      border-left: 4px solid #3b82f6;
+      font-weight: 600;
+    }
+
+    .pacing-badge {
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--cyan);
+      background: rgba(6, 182, 212, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* Pro Editing Checklist */
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #1e2433;
+    }
+    .checklist-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 3px;
+      accent-color: var(--emerald);
+      cursor: pointer;
+    }
+    .check-content strong {
+      display: block;
+      color: #fff;
+      font-size: 14px;
+    }
+    .check-content span {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: #1a1e2b;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <div class="brand-title">Muster Video Director Studio</div>
+      <div class="brand-subtitle">
+        <span>Target Duration: <strong>2:00</strong> (Hard limit: 3:00)</span>
+        <span>•</span>
+        <span class="badge badge-red">Submission Target: 19:00 IST</span>
+        <span>•</span>
+        <span class="badge badge-green">Zero-Basic Guarantee</span>
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-outline" onclick="window.print()">🖨️ Print Script</button>
+      <button class="btn btn-red" onclick="window.open('http://127.0.0.1:8000', '_blank')">🚀 Open Muster Web App</button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-scenes')">🎬 Scene-by-Scene Director</button>
+    <button class="tab-btn" onclick="switchTab('tab-teleprompter')">🎙️ Interactive Teleprompter</button>
+    <button class="tab-btn" onclick="switchTab('tab-premiere')">✂️ Premiere Pro Editing Blueprint</button>
+    <button class="tab-btn" onclick="switchTab('tab-judges')">🏆 Judging Criteria Mapping</button>
+  </div>
+
+  <!-- TAB 1: SCENE-BY-SCENE DIRECTOR -->
+  <div id="tab-scenes" class="tab-content active">
+    
+    <!-- Scene 1 -->
+    <div class="scene-box">
+      <div class="scene-header">
+        <div class="scene-name">
+          <span class="badge badge-amber">Scene 01</span>
+          The Hook & The Ghost Network Scandal
+        </div>
+        <div class="scene-time">0:00 – 0:12 (12s)</div>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-title">🖥️ What to Record On Screen</div>
+          <div class="screen-action">
+            • Open browser to a healthcare directory or the unrun Muster ledger.<br>
+            • Perform a slow, smooth scroll down a list of healthcare listings.<br>
+            • <em>Pro Tip:</em> Press <code>F11</code> for clean full screen (no bookmarks, no taskbar).
+          </div>
+        </div>
+        <div>
+          <div class="col-title">🎙️ What to Speak (Voiceover)</div>
+          <div class="voiceover-box">
+            "Your health insurer publishes a list of in-network doctors. Studies keep finding most of it is wrong. Dead numbers, wrong clinics, and doctors who retired years ago."
+          </div>
+        </div>
+        <div>
+          <div class="col-title">✂️ Premiere Pro Polish</div>
+          <div class="premiere-tip">
+            • Zoom in 125% slowly.<br>
+            • Overlay lower third text: <em>"US Senate Finance Committee: 80% of mental health listings were 'ghosts'"</em>.<br>
+            • Subtle paper rustle or tape sound effect.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 2 -->
+    <div class="scene-box">
+      <div class="scene-header">
+        <div class="scene-name">
+          <span class="badge badge-amber">Scene 02</span>
+          What is Muster? (Powered by CALL-E)
+        </div>
+        <div class="scene-time">0:12 – 0:25 (13s)</div>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-title">🖥️ What to Record On Screen</div>
+          <div class="screen-action">
+            • Muster Web UI (<code>http://127.0.0.1:8000</code>).<br>
+            • Hover over the top bar title: <strong>Muster — Directory ghost-rate auditor</strong>.<br>
+            • Hover over the <strong>◐ Demo</strong> mode pill and preset dropdown.
+          </div>
+        </div>
+        <div>
+          <div class="col-title">🎙️ What to Speak (Voiceover)</div>
+          <div class="voiceover-box">
+            "Muster checks the list for you. Point it at any directory. It dials every listing through CALL-E, asks one qualifying question, and certifies Present or Ghost with cited verbatim quotes."
+          </div>
+        </div>
+        <div>
+          <div class="col-title">✂️ Premiere Pro Polish</div>
+          <div class="premiere-tip">
+            • Quick snap zoom (115%) onto the top bar.<br>
+            • Add crisp UI mouse click sound.<br>
+            • Callout banner: <em>"Built on CALL-E Telephony Gateway"</em>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 3 -->
+    <div class="scene-box">
+      <div class="scene-header">
+        <div class="scene-name">
+          <span class="badge badge-amber">Scene 03</span>
+          The 12-Provider Audit in Motion
+        </div>
+        <div class="scene-time">0:25 – 0:55 (30s)</div>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-title">🖥️ What to Record On Screen</div>
+          <div class="screen-action">
+            • Click <strong>Run Audit</strong> (Speed set to 2x for video).<br>
+            • Dark switchboard centerpiece lights up: nodes pulse amber while dialing, turn green or red.<br>
+            • Telemetry counters count up; ledger rows stream in with telegraph typing.
+          </div>
+        </div>
+        <div>
+          <div class="col-title">🎙️ What to Speak (Voiceover)</div>
+          <div class="voiceover-box">
+            "Here's a twelve-provider insurer directory. Muster dials the entire network concurrently. Each call returns an operational verdict and confidence score in real time."
+          </div>
+        </div>
+        <div>
+          <div class="col-title">✂️ Premiere Pro Polish</div>
+          <div class="premiere-tip">
+            • Speed-ramp 150% in the middle of the batch so there is zero dead time.<br>
+            • Punch in (130%) on the dark switchboard circular hub.<br>
+            • Soft high-tech hum or pulse audio SFX.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 4 -->
+    <div class="scene-box">
+      <div class="scene-header">
+        <div class="scene-name">
+          <span class="badge badge-amber">Scene 04</span>
+          The Reveal Finale & Cited Proof
+        </div>
+        <div class="scene-time">0:55 – 1:12 (17s)</div>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-title">🖥️ What to Record On Screen</div>
+          <div class="screen-action">
+            • Audit finishes: watch <strong>The Reveal</strong>! Ghost nodes physically crack and drop away.<br>
+            • Circular dial fills with oxblood red (58.3% Ghost Rate).<br>
+            • Click a GHOST row: Evidence modal opens showing the verbatim transcript and cited quote.
+          </div>
+        </div>
+        <div>
+          <div class="col-title">🎙️ What to Speak (Voiceover)</div>
+          <div class="voiceover-box">
+            "When the audit completes, the ghosts drop off the board. Seven of twelve were fake. A patient would call nearly twice to reach one real provider. Every verdict links to the transcript that proves it."
+          </div>
+        </div>
+        <div>
+          <div class="col-title">✂️ Premiere Pro Polish</div>
+          <div class="premiere-tip">
+            • Low bass drop / impact boom right when ghost nodes crack!<br>
+            • Slow zoom on the stat: <em>"2.4 calls to reach 1 real provider · DEFECTIVE"</em>.<br>
+            • Box callout on the cited pull-quote in the evidence modal.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 5 -->
+    <div class="scene-box" style="border: 2px solid rgba(217,72,59,0.5);">
+      <div class="scene-header" style="background: rgba(217,72,59,0.15);">
+        <div class="scene-name">
+          <span class="badge badge-red">Scene 05 — THE HERO BEAT</span>
+          Real CALL-E Runtime Live Call (Nothing Faked)
+        </div>
+        <div class="scene-time">1:12 – 1:45 (33s)</div>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-title">🖥️ What to Record On Screen</div>
+          <div class="screen-action">
+            • Toggle switch to <strong>● Live</strong> (red banner activates).<br>
+            • Select or Upload <code>sample_data/live_demo_audit.json</code>.<br>
+            • Click <strong>Run LIVE Audit</strong> → Confirm credit guard modal.<br>
+            • Watch CALL-E connect live to <strong>CityMD Urgent Care / Mayo Clinic</strong> (e.g. <code>+12127294668</code>).<br>
+            • Row resolves live with verbatim transcript and certified evidence.<br>
+            • Quick 3s cut to <strong>Airudder CALL-E Dashboard</strong> showing real <code>call_id</code> and duration!
+          </div>
+        </div>
+        <div>
+          <div class="col-title">🎙️ What to Speak (Voiceover)</div>
+          <div class="voiceover-box">
+            "This is not a simulation. I flip to Live mode, confirm the credit guard, and Muster places a real CALL-E call. The clinic switchboard answers live. CALL-E asks our verification question, extracts the operating signals, and streams the verbatim transcript into the ledger. Placed at runtime, certified on Muster."
+          </div>
+        </div>
+        <div>
+          <div class="col-title">✂️ Premiere Pro Polish</div>
+          <div class="premiere-tip">
+            • Vignette red pulse around the screen corners during LIVE mode.<br>
+            • Big red arrow pointing to <code>call_id</code> and credits on the CALL-E dashboard.<br>
+            • <em>Evidence:</em> Show the verbatim transcript and cited quote in the evidence modal!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 6 -->
+    <div class="scene-box">
+      <div class="scene-header">
+        <div class="scene-name">
+          <span class="badge badge-green">Scene 06</span>
+          Reusability, 30 Passing Tests & Close
+        </div>
+        <div class="scene-time">1:45 – 2:00 (15s)</div>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-title">🖥️ What to Record On Screen</div>
+          <div class="screen-action">
+            • Split screen or quick cut:<br>
+            1. Terminal running <code>pytest</code> → <strong>30 passed in 0.12s</strong> (green text).<br>
+            2. VS Code showing <code>skills/muster/SKILL.md</code> and <code>muster/mcp_server.py</code>.<br>
+            3. Final landing on the Muster logo.
+          </div>
+        </div>
+        <div>
+          <div class="col-title">🎙️ What to Speak (Voiceover)</div>
+          <div class="voiceover-box">
+            "Muster ships as a reusable CALL-E agent skill for any directory worldwide. Thirty automated tests, zero-cost mock harness, and instant compliance exports. Muster: Stop trusting the list. Check it."
+          </div>
+        </div>
+        <div>
+          <div class="col-title">✂️ Premiere Pro Polish</div>
+          <div class="premiere-tip">
+            • Big green badge: <strong>30 / 30 Automated Tests Passed</strong>.<br>
+            • GitHub link overlay: <code>github.com/omshukla24/Muster</code>.<br>
+            • Fade to black with brand tagline.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB 2: INTERACTIVE TELEPROMPTER -->
+  <div id="tab-teleprompter" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>🎙️ Live Voiceover Studio</span>
+        <span style="font-size: 13px; color: var(--text-muted); font-weight: 400;">Total Words: ~210 words · Pacing: 130 words/min · Exact duration: 1:55</span>
+      </div>
+
+      <div class="teleprompter-controls">
+        <div class="timer-display" id="timer">00:00</div>
+        <button class="btn btn-red" id="btn-start" onclick="toggleTimer()">▶ Start Teleprompter</button>
+        <button class="btn btn-outline" onclick="resetTimer()">↺ Reset</button>
+        <div style="margin-left: auto; display: flex; gap: 10px;">
+          <button class="btn btn-outline" onclick="changeFontSize(2)">A+</button>
+          <button class="btn btn-outline" onclick="changeFontSize(-2)">A-</button>
+          <button class="btn btn-outline" onclick="copyFullScript()">📋 Copy Voiceover</button>
+        </div>
+      </div>
+
+      <div class="teleprompter-stage" id="prompt-stage">
+        <div class="teleprompter-text" id="prompt-text">
+          <p id="beat-1" data-start="0" data-end="12">
+            <span class="pacing-badge">0:00 - 0:12</span>
+            Your health insurer publishes a list of in-network doctors. Studies keep finding most of it is wrong. Dead numbers, wrong clinics, and doctors who retired years ago.
+          </p>
+
+          <p id="beat-2" data-start="12" data-end="25">
+            <span class="pacing-badge">0:12 - 0:25</span>
+            Muster checks the list for you. Point it at any directory. It dials every listing through CALL-E, asks one qualifying question, and certifies Present or Ghost with cited verbatim quotes.
+          </p>
+
+          <p id="beat-3" data-start="25" data-end="55">
+            <span class="pacing-badge">0:25 - 0:55</span>
+            Here's a twelve-provider insurer directory. Muster dials the entire network concurrently. Each call returns an operational verdict and confidence score in real time.
+          </p>
+
+          <p id="beat-4" data-start="55" data-end="72">
+            <span class="pacing-badge">0:55 - 1:12</span>
+            When the audit completes, the ghosts drop off the board. Seven of twelve were fake. A patient would call nearly twice to reach one real provider. Every verdict links to the transcript that proves it.
+          </p>
+
+          <p id="beat-5" data-start="72" data-end="105">
+            <span class="pacing-badge">1:12 - 1:45</span>
+            This is not a simulation. I flip to Live mode, confirm the credit guard, and Muster places a real CALL-E call. The clinic switchboard answers live. CALL-E asks our verification question, extracts the operating signals, and streams the verbatim transcript into the ledger. Placed at runtime, certified on Muster.
+          </p>
+
+          <p id="beat-6" data-start="105" data-end="120">
+            <span class="pacing-badge">1:45 - 2:00</span>
+            Muster ships as a reusable CALL-E agent skill for any directory worldwide. Thirty automated tests, zero-cost mock harness, and instant compliance exports. Muster: Stop trusting the list. Check it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: PREMIERE PRO EDITING BLUEPRINT -->
+  <div id="tab-premiere" class="tab-content">
+    <div class="grid-2">
+      
+      <div class="card">
+        <div class="card-title">✂️ The 5 Rules to NOT Look "Basic"</div>
+        <div class="checklist-item">
+          <input type="checkbox" checked>
+          <div class="check-content">
+            <strong>1. Punch-in Zooms (115% – 130%) Every 4 to 6 Seconds</strong>
+            <span>Never let a raw 1920x1080 static screen sit for more than 5 seconds. Whenever you talk about a button, dial, or node, keyframe scale to 125% centered on that element.</span>
+          </div>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" checked>
+          <div class="check-content">
+            <strong>2. Fast Speed Ramps on API & Dialing Delays</strong>
+            <span>During the 12-call demo audit, speed up the middle 10 seconds to 200% or 300%. The judges want to see the velocity, not wait for progress bars.</span>
+          </div>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" checked>
+          <div class="check-content">
+            <strong>3. Sound Design (The Secret Sauce)</strong>
+            <span>Add subtle SFX: UI clicks when buttons are pressed, a digital whoosh on transitions, a low sub-bass boom when ghost nodes crack in the Reveal finale, and a telephone dial tone during live call.</span>
+          </div>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" checked>
+          <div class="check-content">
+            <strong>4. Background Music Ducking</strong>
+            <span>Pick a low-tempo tech/lo-fi beat. Set volume to <code>-24dB</code> to <code>-28dB</code> under your voice, and bump it to <code>-14dB</code> during the 3-second pause before the Reveal!</span>
+          </div>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" checked>
+          <div class="check-content">
+            <strong>5. Bold Lower-Third Callouts</strong>
+            <span>Use sleek dark rounded pill boxes (e.g. <code>#141822</code> with oxblood border) for captions like "CALLED AT RUNTIME", "30 PASSING TESTS", "SENATE 80% GHOST RATE".</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⏱️ 2-Hour Action Schedule (Deadline 19:00 IST)</div>
+        <div class="checklist-item">
+          <input type="checkbox">
+          <div class="check-content">
+            <strong>Phase 1: Screen Recording (25 mins · 15:50 – 16:15)</strong>
+            <span>Record each scene separately. Don't speak while recording screen. Record 2 takes of each screen action so you have clean footage to edit.</span>
+          </div>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox">
+          <div class="check-content">
+            <strong>Phase 2: Voiceover Audio (15 mins · 16:15 – 16:30)</strong>
+            <span>Use your phone's voice recorder or microphone. Read from the Teleprompter tab. Speak clearly, pause between sentences so cuts are easy.</span>
+          </div>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox">
+          <div class="check-content">
+            <strong>Phase 3: Premiere Pro Timeline Assembly (45 mins · 16:30 – 17:15)</strong>
+            <span>Drop voiceover on Track A1. Cut dead silence. Align screen recordings to voiceover. Apply 125% zoom keyframes on hero elements. Add clicks and whooshes.</span>
+          </div>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox">
+          <div class="check-content">
+            <strong>Phase 4: Export & Upload (20 mins · 17:15 – 17:35)</strong>
+            <span>Export H.264, 1080p, YouTube Match Source. Upload to YouTube as Unlisted (or Loom). Check audio levels on mobile.</span>
+          </div>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox">
+          <div class="check-content">
+            <strong>Phase 5: Devpost & PR Submission (45 mins · 17:35 – 18:20)</strong>
+            <span>Fill Devpost form, link YouTube video and GitHub repo, open PR on <code>awesome-phone-call-agents</code>. Ready 40 mins before 19:00!</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TAB 4: JUDGING ALIGNMENT -->
+  <div id="tab-judges" class="tab-content">
+    <div class="card">
+      <div class="card-title">🏆 How This Video Directly Scores 100% on All 4 Criteria</div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px;">
+        <thead>
+          <tr style="background: #171b26; text-align: left;">
+            <th style="padding: 12px; border: 1px solid var(--card-border);">Judging Criterion</th>
+            <th style="padding: 12px; border: 1px solid var(--card-border);">Exact Video Timestamp</th>
+            <th style="padding: 12px; border: 1px solid var(--card-border);">What the Judge Sees & Scores</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 12px; border: 1px solid var(--card-border); font-weight: 700; color: #f87171;">1. Real-World Impact</td>
+            <td style="padding: 12px; border: 1px solid var(--card-border); font-family: 'JetBrains Mono'; color: var(--cyan);">0:00 – 0:15</td>
+            <td style="padding: 12px; border: 1px solid var(--card-border);">US Senate 80% ghost network crisis, patient access multiplier $N = 1/(1-GR)$, life-or-death directory inaccuracy.</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; border: 1px solid var(--card-border); font-weight: 700; color: #fbbf24;">2. Idea Quality & Innovation</td>
+            <td style="padding: 12px; border: 1px solid var(--card-border); font-family: 'JetBrains Mono'; color: var(--cyan);">0:15 – 0:45</td>
+            <td style="padding: 12px; border: 1px solid var(--card-border);">Automated batch qualifying audits via voice AI, deterministic citation quotes, credit-guarded telephony runner.</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; border: 1px solid var(--card-border); font-weight: 700; color: #ef4444;">3. CALL-E at Runtime</td>
+            <td style="padding: 12px; border: 1px solid var(--card-border); font-family: 'JetBrains Mono'; color: var(--cyan);">1:12 – 1:45</td>
+            <td style="padding: 12px; border: 1px solid var(--card-border);">Live clinic switchboard call, verbatim spoken transcript, exact confidence scores, runtime CLI execution.</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; border: 1px solid var(--card-border); font-weight: 700; color: #4ade80;">4. Product Experience & Reusability</td>
+            <td style="padding: 12px; border: 1px solid var(--card-border); font-family: 'JetBrains Mono'; color: var(--cyan);">0:45 – 1:12 & 1:45 – 2:00</td>
+            <td style="padding: 12px; border: 1px solid var(--card-border);">Full-bleed switchboard UI, "The Reveal" finale, 30 passing tests, reusable Agent Skill format for community PR.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  }
+
+  let timerInterval = null;
+  let seconds = 0;
+  let isRunning = false;
+
+  function toggleTimer() {
+    const btn = document.getElementById('btn-start');
+    if (!isRunning) {
+      isRunning = true;
+      btn.innerText = '⏸ Pause';
+      btn.classList.replace('btn-red', 'btn-outline');
+      timerInterval = setInterval(() => {
+        seconds++;
+        updateDisplay();
+        highlightBeat(seconds);
+      }, 1000);
+    } else {
+      isRunning = false;
+      btn.innerText = '▶ Resume';
+      btn.classList.replace('btn-outline', 'btn-red');
+      clearInterval(timerInterval);
+    }
+  }
+
+  function resetTimer() {
+    isRunning = false;
+    clearInterval(timerInterval);
+    seconds = 0;
+    updateDisplay();
+    document.getElementById('btn-start').innerText = '▶ Start Teleprompter';
+    document.getElementById('btn-start').classList.replace('btn-outline', 'btn-red');
+    document.querySelectorAll('.teleprompter-text p').forEach(p => p.classList.remove('current-beat'));
+  }
+
+  function updateDisplay() {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    document.getElementById('timer').innerText = 
+      `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  function highlightBeat(time) {
+    const beats = document.querySelectorAll('.teleprompter-text p');
+    beats.forEach(p => {
+      const start = parseInt(p.getAttribute('data-start'));
+      const end = parseInt(p.getAttribute('data-end'));
+      if (time >= start && time < end) {
+        if (!p.classList.contains('current-beat')) {
+          beats.forEach(b => b.classList.remove('current-beat'));
+          p.classList.add('current-beat');
+          p.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    });
+  }
+
+  let currentFontSize = 26;
+  function changeFontSize(delta) {
+    currentFontSize += delta;
+    document.getElementById('prompt-text').style.fontSize = currentFontSize + 'px';
+  }
+
+  function copyFullScript() {
+    const text = `Your health insurer publishes a list of in-network doctors. Studies keep finding most of it is wrong. Dead numbers, wrong clinics, and doctors who retired years ago.
+
+Muster checks the list for you. Point it at any directory. It dials every listing through CALL-E, asks one qualifying question, and certifies Present or Ghost with cited verbatim quotes.
+
+Here's a twelve-provider insurer directory. Muster dials the entire network concurrently. Each call returns an operational verdict and confidence score in real time.
+
+When the audit completes, the ghosts drop off the board. Seven of twelve were fake. A patient would call nearly twice to reach one real provider. Every verdict links to the transcript that proves it.
+
+This is not a simulation. I flip to Live mode, confirm the credit guard, and Muster places a real CALL-E call. The clinic switchboard answers live. CALL-E asks our verification question, extracts the operating signals, and streams the verbatim transcript into the ledger. Placed at runtime, certified on Muster.
+
+Muster ships as a reusable CALL-E agent skill for any directory worldwide. Thirty automated tests, zero-cost mock harness, and instant compliance exports. Muster: Stop trusting the list. Check it.`;
+    navigator.clipboard.writeText(text);
+    alert('Full Voiceover script copied to clipboard! Ready to paste into Premiere Pro or teleprompter.');
+  }
+</script>
+
+</body>
+</html>

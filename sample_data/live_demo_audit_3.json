@@ -1,0 +1,26 @@
+[
+  {
+    "id": "LIVE-001",
+    "name": "CityMD Urgent Care (West 42nd - Times Square)",
+    "phone": "+16465180159",
+    "claimed_status": "In-Network - BlueCross PPO",
+    "category": "Walk-in Urgent Care & Primary Care",
+    "address": "New York, NY"
+  },
+  {
+    "id": "LIVE-002",
+    "name": "Midtown New York Doctors Urgent Care",
+    "phone": "+12126844700",
+    "claimed_status": "In-Network - Aetna Choice",
+    "category": "Family Practice & Urgent Care",
+    "address": "New York, NY"
+  },
+  {
+    "id": "LIVE-003",
+    "name": "MedRite Urgent Care (Midtown West)",
+    "phone": "+12126954444",
+    "claimed_status": "In-Network - UnitedHealthcare",
+    "category": "Immediate Care Center",
+    "address": "New York, NY"
+  }
+]
